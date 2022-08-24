@@ -32,7 +32,7 @@ namespace EdFi.Ods.CodeGen.Generators
 
         protected override object Build()
         {
-            var views = _authorizationDatabaseTableViewsProvider.LoadViews();
+            var views = _authorizationDatabaseTableViewsProvider.LoadViews(TemplateContext.ModelVersion);
 
             return
                 new OrmMapping

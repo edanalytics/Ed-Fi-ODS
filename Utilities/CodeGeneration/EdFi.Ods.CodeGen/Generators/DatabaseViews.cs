@@ -20,7 +20,7 @@ namespace EdFi.Ods.CodeGen.Generators
 
         protected override object Build()
         {
-            var views = _authorizationDatabaseTableViewsProvider.LoadViews().Select(
+            var views = _authorizationDatabaseTableViewsProvider.LoadViews(TemplateContext.ModelVersion).Select(
                 v => new
                 {
                     SchemaOwner = v.SchemaOwner,

@@ -48,7 +48,7 @@ namespace EdFi.Ods.CodeGen.Generators
                 }
             };
 
-            var views = _authorizationDatabaseTableViewsProvider.LoadViews();
+            var views = _authorizationDatabaseTableViewsProvider.LoadViews(TemplateContext.ModelVersion);
 
             string GetCSharpNullSuffix(AuthorizationDatabaseColumn c)
                 => c.Nullable && _databaseTypeTranslator.GetSysType(c.DbDataType) != "string"

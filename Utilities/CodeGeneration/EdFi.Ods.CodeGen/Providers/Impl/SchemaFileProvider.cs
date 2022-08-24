@@ -18,30 +18,34 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
 
         private readonly ILog _logger = LogManager.GetLogger(typeof(SchemaFileProvider));
 
-        private readonly string _standardSchemaFolder;
+        private readonly IMetadataFolderProvider _metadataFolderProvider;
 
         public SchemaFileProvider(IMetadataFolderProvider metadataFolderProvider)
         {
+            _metadataFolderProvider = metadataFolderProvider;
             Preconditions.ThrowIfNull(metadataFolderProvider, nameof(metadataFolderProvider));
-            _standardSchemaFolder = metadataFolderProvider.GetStandardSchemaFolder();
         }
 
-        public string GetEdFiSchema()
+        public string GetEdFiSchema(string version)
         {
-            var file = Path.Combine(_standardSchemaFolder, EdFiSchemaName);
+            string standardSchemaFolder = _metadataFolderProvider.GetStandardSchemaFolder(version);
+            
+            var file = Path.Combine(standardSchemaFolder, EdFiSchemaName);
 
             return File.Exists(file)
                 ? file
-                : throw new FileNotFoundException(GetExceptionMessage(_standardSchemaFolder, EdFiSchemaName));
+                : throw new FileNotFoundException(GetExceptionMessage(standardSchemaFolder, EdFiSchemaName));
         }
 
-        public string GetEdFiSchemaAnnotation()
+        public string GetEdFiSchemaAnnotation(string version)
         {
-            var file = Path.Combine(_standardSchemaFolder, EdFiSchemaAnnotationName);
+            string standardSchemaFolder = _metadataFolderProvider.GetStandardSchemaFolder(version);
+            
+            var file = Path.Combine(standardSchemaFolder, EdFiSchemaAnnotationName);
 
             return File.Exists(file)
                 ? file
-                : throw new FileNotFoundException(GetExceptionMessage(_standardSchemaFolder, EdFiSchemaAnnotationName));
+                : throw new FileNotFoundException(GetExceptionMessage(standardSchemaFolder, EdFiSchemaAnnotationName));
         }
 
         public string GetExtensionSchema(string folder)

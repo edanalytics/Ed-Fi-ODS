@@ -10,6 +10,6 @@ using EdFi.Ods.CodeGen.Models;
 namespace EdFi.Ods.CodeGen.Providers {
     public interface IAuthorizationDatabaseTableViewsProvider
     {
-        List<AuthorizationDatabaseTable> LoadViews();
+        List<AuthorizationDatabaseTable> LoadViews(string templateContextModelVersion);
     }
 }

@@ -7,9 +7,9 @@ namespace EdFi.Ods.CodeGen.Providers
 {
     public interface ISchemaFileProvider
     {
-        string GetEdFiSchema();
+        string GetEdFiSchema(string version);
 
-        string GetEdFiSchemaAnnotation();
+        string GetEdFiSchemaAnnotation(string version);
 
         string GetExtensionSchema(string folder);
     }

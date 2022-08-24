@@ -99,6 +99,8 @@ namespace EdFi.Ods.CodeGen.Models
 
         public TemplateSet TemplateSet { get; private set; }
 
+        public string ModelVersion { get; set; }
+
         public void With(TemplateSet templateSet)
         {
             Preconditions.ThrowIfNull(templateSet, nameof(templateSet));

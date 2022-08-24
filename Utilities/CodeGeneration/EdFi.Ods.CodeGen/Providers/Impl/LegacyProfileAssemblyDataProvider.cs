@@ -42,12 +42,14 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
                     legacyProfilePath,
                     ProfilesSearchString,
                     SearchOption.AllDirectories)
+                .Select(p => new { Path = p, VersionedPath = _assemblyDataHelper.GetAssemblyName(p) })
                 .Select(
                     x => new AssemblyData
                     {
-                        Path = Path.GetDirectoryName(x),
+                        Path = Path.GetDirectoryName(x.Path),
                         TemplateSet = TemplateSetConventions.Profile,
-                        AssemblyName = _assemblyDataHelper.GetAssemblyName(x),
+                        AssemblyName = x.VersionedPath.Name,
+                        ModelVersion = x.VersionedPath.Version,
                         IsProfile = true,
                         IsExtension = false,
                         SchemaName = EdFiConventions.ProperCaseName

@@ -18,18 +18,18 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
             _codeRepositoryProvider = codeRepositoryProvider ?? throw new ArgumentNullException(nameof(codeRepositoryProvider));
         }
 
-        public string GetStandardMetadataFolder()
+        public string GetStandardMetadataFolder(string version)
         {
             return _codeRepositoryProvider.GetResolvedCodeRepositoryByName(
                 CodeRepositoryConventions.Ods,
-                StandardConventions.Metadata);
+                StandardConventions.Metadata(version));
         }
 
-        public string GetStandardSchemaFolder()
+        public string GetStandardSchemaFolder(string version)
         {
             return _codeRepositoryProvider.GetResolvedCodeRepositoryByName(
                 CodeRepositoryConventions.Ods,
-                StandardConventions.Schemas);
+                StandardConventions.Schemas(version));
         }
 
         public string GetProjectSchemaFolder(string projectPath)

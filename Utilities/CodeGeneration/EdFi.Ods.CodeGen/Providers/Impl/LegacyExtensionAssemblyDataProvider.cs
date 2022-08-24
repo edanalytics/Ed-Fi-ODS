@@ -23,7 +23,7 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
 
         private readonly AssemblyDataHelper _assemblyDataHelper;
         private readonly ICodeRepositoryProvider _codeRepositoryProvider;
-        private readonly IDictionary<string, IDomainModelDefinitionsProvider> _domainModelsDefinitionsProvidersByProjectName;
+        private readonly IDictionary<VersionedPath, IDomainModelDefinitionsProvider> _domainModelsDefinitionsProvidersByProjectName;
 
         public const string ExtensionsSearchString = "EdFi.Ods.Extensions.*.csproj";
 
@@ -54,10 +54,10 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
                 .Select(
                     x =>
                     {
-                        string assemblyName = _assemblyDataHelper.GetAssemblyName(x);
+                        var versionedAssembly = _assemblyDataHelper.GetAssemblyName(x);
 
                         string schemaName = ExtensionsConventions.GetProperCaseNameForLogicalName(
-                            _domainModelsDefinitionsProvidersByProjectName[assemblyName]
+                            _domainModelsDefinitionsProvidersByProjectName[versionedAssembly]
                                 .GetDomainModelDefinitions()
                                 .SchemaDefinition
                                 .LogicalName);
@@ -66,7 +66,8 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
                         {
                             Path = Path.GetDirectoryName(x),
                             TemplateSet = TemplateSetConventions.Extension,
-                            AssemblyName = assemblyName,
+                            AssemblyName = versionedAssembly.Name,
+                            ModelVersion = versionedAssembly.Version,
                             IsExtension = true,
                             IsProfile = false,
                             SchemaName = schemaName

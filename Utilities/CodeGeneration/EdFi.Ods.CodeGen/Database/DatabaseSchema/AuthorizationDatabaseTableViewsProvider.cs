@@ -31,7 +31,7 @@ namespace EdFi.Ods.CodeGen.Database.DatabaseSchema
             _connectionString = connectionStringProvider.GetConnectionString();
         }
 
-        public List<AuthorizationDatabaseTable> LoadViews()
+        public List<AuthorizationDatabaseTable> LoadViews(string templateContextModelVersion)
         {
             if (_views != null)
             {

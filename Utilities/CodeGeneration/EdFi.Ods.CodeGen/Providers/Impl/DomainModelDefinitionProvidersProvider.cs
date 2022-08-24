@@ -18,7 +18,7 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
     {
         private static readonly string _standardModelsPath = Path.Combine("Artifacts", "Metadata", "ApiModel.json");
         private static readonly string _extensionModelsPath = Path.Combine("Artifacts", "Metadata", "ApiModel-EXTENSION.json");
-        private readonly Lazy<Dictionary<string, IDomainModelDefinitionsProvider>> _domainModelDefinitionProvidersByProjectName;
+        private readonly Lazy<Dictionary<VersionedPath, IDomainModelDefinitionsProvider>> _domainModelDefinitionProvidersByProjectName;
 
         private readonly string _solutionPath;
         private readonly ILog Logger = LogManager.GetLogger(typeof(DomainModelDefinitionProvidersProvider));
@@ -38,7 +38,7 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
                 "Extensions");
 
             _domainModelDefinitionProvidersByProjectName =
-                new Lazy<Dictionary<string, IDomainModelDefinitionsProvider>>(CreateDomainModelDefinitionsByPath);
+                new Lazy<Dictionary<VersionedPath, IDomainModelDefinitionsProvider>>(CreateDomainModelDefinitionsByPath);
 
             _extensionPluginsProviderProvider = extensionPluginsProviderProvider;
 
@@ -55,17 +55,17 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
             return _domainModelDefinitionProvidersByProjectName.Value.Values;
         }
 
-        public IDictionary<string, IDomainModelDefinitionsProvider> DomainModelDefinitionsProvidersByProjectName()
+        public IDictionary<VersionedPath, IDomainModelDefinitionsProvider> DomainModelDefinitionsProvidersByProjectName()
         {
             return _domainModelDefinitionProvidersByProjectName.Value;
         }
 
-        private Dictionary<string, IDomainModelDefinitionsProvider> CreateDomainModelDefinitionsByPath()
+        private Dictionary<VersionedPath, IDomainModelDefinitionsProvider> CreateDomainModelDefinitionsByPath()
         {
             DirectoryInfo[] directoriesToEvaluate;
 
-            var domainModelDefinitionsByPath =
-                new Dictionary<string, IDomainModelDefinitionsProvider>(StringComparer.InvariantCultureIgnoreCase);
+            var domainModelDefinitionsByVersionedPath =
+                new Dictionary<VersionedPath, IDomainModelDefinitionsProvider>();
 
             string edFiOdsImplementationApplicationPath = _solutionPath;
 
@@ -105,31 +105,40 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
 
             foreach (var modelProject in modelProjects)
             {
-                var modelsPath = modelProject.Name.IsStandardAssembly()
+                var modelsRelativePath = modelProject.Name.IsStandardAssembly()
                     ? _standardModelsPath
                     : _extensionModelsPath;
 
-                var metadataFile = new FileInfo(Path.Combine(modelProject.FullName, modelsPath));
+                var versionDirectories = Directory.GetDirectories(modelProject.FullName)
+                    .Where(d => char.IsNumber(Path.GetFileName(d)[0]))
+                    .ToArray();
 
-                Logger.Debug($"Loading ApiModels for {metadataFile}.");
-
-                if (!metadataFile.Exists)
+                foreach (string versionDirectory in versionDirectories)
                 {
-                    throw new Exception(
-                        $"Unable to find model definitions file for extensions project {modelProject.Name} at location {metadataFile.FullName}.");
-                }
+                    var metadataFile = new FileInfo(Path.Combine(versionDirectory, modelsRelativePath));
 
-                if (domainModelDefinitionsByPath.ContainsKey(modelProject.Name))
-                {
-                    throw new Exception($"Cannot process duplicate extension projects for '{modelProject.Name}'.");
-                }
+                    Logger.Debug($"Loading ApiModels for {metadataFile}.");
 
-                domainModelDefinitionsByPath.Add(
-                    modelProject.Name,
-                    new DomainModelDefinitionsJsonFileSystemProvider(metadataFile.FullName));
+                    if (!metadataFile.Exists)
+                    {
+                        throw new Exception(
+                            $"Unable to find model definitions file for extensions project {modelProject.Name} at location {metadataFile.FullName}.");
+                    }
+
+                    string version = Path.GetFileName(versionDirectory);
+
+                    if (domainModelDefinitionsByVersionedPath.ContainsKey(new VersionedPath(modelProject.Name, version)))
+                    {
+                        throw new Exception($"Cannot process duplicate extension projects for '{modelProject.Name}' and version '{version}'.");
+                    }
+
+                    domainModelDefinitionsByVersionedPath.Add(
+                        new VersionedPath(modelProject.Name, version),
+                        new DomainModelDefinitionsJsonFileSystemProvider(metadataFile.FullName));
+                }
             }
 
-            return domainModelDefinitionsByPath;
+            return domainModelDefinitionsByVersionedPath;
 
             DirectoryInfo[] GetProjectDirectoriesToEvaluate(string basePath)
             {

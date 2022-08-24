@@ -4,6 +4,7 @@
 // See the LICENSE and NOTICES files in the project root for more information.
 
 using System.Collections.Generic;
+using EdFi.Ods.CodeGen.Providers.Impl;
 using EdFi.Ods.Common.Models;
 
 namespace EdFi.Ods.CodeGen.Providers
@@ -12,6 +13,18 @@ namespace EdFi.Ods.CodeGen.Providers
     {
         IEnumerable<IDomainModelDefinitionsProvider> DomainModelDefinitionProviders();
 
-        IDictionary<string, IDomainModelDefinitionsProvider> DomainModelDefinitionsProvidersByProjectName();
+        IDictionary<VersionedPath, IDomainModelDefinitionsProvider> DomainModelDefinitionsProvidersByProjectName();
+    }
+
+    public struct VersionedPath
+    {
+        public VersionedPath(string name, string version)
+        {
+            Name = name;
+            Version = version;
+        }
+
+        public string Name { get; }
+        public string Version { get; }
     }
 }

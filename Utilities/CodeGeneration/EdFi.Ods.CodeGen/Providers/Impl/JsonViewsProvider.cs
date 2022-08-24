@@ -4,9 +4,9 @@
 // See the LICENSE and NOTICES files in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using DatabaseSchemaReader.DataSchema;
 using EdFi.Common;
 using EdFi.Ods.CodeGen.Models;
 
@@ -14,17 +14,23 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
 {
     public class JsonViewsProvider : JsonFileProvider, IAuthorizationDatabaseTableViewsProvider
     {
-        private readonly Lazy<List<AuthorizationDatabaseTable>> _views;
+        private readonly ConcurrentDictionary<string, List<AuthorizationDatabaseTable>> _viewsByModelVersion = new();
+        private readonly IMetadataFolderProvider _metadataFolderProvider;
 
         public JsonViewsProvider(IMetadataFolderProvider metadataFolderProvider)
         {
+            _metadataFolderProvider = metadataFolderProvider;
             Preconditions.ThrowIfNull(metadataFolderProvider, nameof(metadataFolderProvider));
-
-            _views = new Lazy<List<AuthorizationDatabaseTable>>(
-                () => Load<List<AuthorizationDatabaseTable>>(
-                    Path.Combine(metadataFolderProvider.GetStandardMetadataFolder(), "DatabaseViews.generated.json")));
         }
 
-        public List<AuthorizationDatabaseTable> LoadViews() => _views.Value;
+        public List<AuthorizationDatabaseTable> LoadViews(string templateContextModelVersion)
+        {
+            return _viewsByModelVersion.GetOrAdd(
+                templateContextModelVersion,
+                mv => Load<List<AuthorizationDatabaseTable>>(
+                    Path.Combine(
+                        _metadataFolderProvider.GetStandardMetadataFolder(templateContextModelVersion),
+                        "DatabaseViews.generated.json")));
+        }
     }
 }

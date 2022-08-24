@@ -7,9 +7,9 @@ namespace EdFi.Ods.CodeGen.Providers
 {
     public interface IMetadataFolderProvider
     {
-        string GetStandardMetadataFolder();
+        string GetStandardMetadataFolder(string version);
 
-        string GetStandardSchemaFolder();
+        string GetStandardSchemaFolder(string version);
 
         string GetProjectSchemaFolder(string projectPath);
 

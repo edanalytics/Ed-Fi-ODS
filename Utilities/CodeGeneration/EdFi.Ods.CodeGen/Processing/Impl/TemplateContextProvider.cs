@@ -15,6 +15,7 @@ using EdFi.Ods.Common;
 using EdFi.Ods.Common.Conventions;
 using EdFi.Ods.Common.Extensions;
 using EdFi.Ods.Common.Models;
+using EdFi.Ods.Common.Models.Definitions;
 using EdFi.Ods.Common.Models.Domain;
 
 namespace EdFi.Ods.CodeGen.Processing.Impl
@@ -60,6 +61,7 @@ namespace EdFi.Ods.CodeGen.Processing.Impl
                 ProjectPath = assemblyData.Path,
                 IsProfiles = assemblyData.IsProfile,
                 IsExtension = assemblyData.IsExtension,
+                ModelVersion = assemblyData.ModelVersion,
                 SchemaProperCaseName = schemaNameMap.ProperCaseName,
                 DomainModelProvider = domainModelProvider,
                 SchemaPhysicalName = schemaNameMap.PhysicalName
@@ -75,7 +77,7 @@ namespace EdFi.Ods.CodeGen.Processing.Impl
             {
                 // Always include EdFi, only include the extension definition provider that matches the current context
                 // to avoid issues with templates not handling multiple models active
-                domainModelDefinitionsToLoad = GetDomainModelDefinitionProviders(assemblyData.SchemaName);
+                domainModelDefinitionsToLoad = GetDomainModelDefinitionProviders(assemblyData.SchemaName, assemblyData.ModelVersion);
             }
 
             return new DomainModelProvider(
@@ -83,18 +85,19 @@ namespace EdFi.Ods.CodeGen.Processing.Impl
                 Array.Empty<IDomainModelDefinitionsTransformer>());
         }
 
-        private List<IDomainModelDefinitionsProvider> GetDomainModelDefinitionProviders(string schemaName)
+        private List<IDomainModelDefinitionsProvider> GetDomainModelDefinitionProviders(string schemaName, string modelVersion)
         {
-            return _domainModelDefinitionProviders
-                .Value
+            return _domainModelDefinitionProviders.Value
                 .Where(
-                    x => schemaName
-                             .EqualsIgnoreCase(
-                                 ExtensionsConventions.GetProperCaseNameForLogicalName(
-                                     x.GetDomainModelDefinitions()
-                                         .SchemaDefinition.LogicalName))
-                         || x.GetDomainModelDefinitions()
-                             .SchemaDefinition.LogicalName.EqualsIgnoreCase(EdFiConventions.LogicalName))
+                    x =>
+                    {
+                        var schemaDefinition = x.GetDomainModelDefinitions().SchemaDefinition;
+
+                        return schemaDefinition.Version.Equals(modelVersion)
+                            && (schemaName.EqualsIgnoreCase(
+                                    ExtensionsConventions.GetProperCaseNameForLogicalName(schemaDefinition.LogicalName))
+                                || schemaDefinition.LogicalName.EqualsIgnoreCase(EdFiConventions.LogicalName));
+                    })
                 .ToList();
         }
     }

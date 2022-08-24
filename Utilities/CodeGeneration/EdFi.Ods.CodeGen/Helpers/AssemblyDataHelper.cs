@@ -19,7 +19,7 @@ namespace EdFi.Ods.CodeGen.Helpers
     public class AssemblyDataHelper
     {
         private readonly IJsonFileProvider _jsonFileProvider;
-        private readonly IDictionary<string, IDomainModelDefinitionsProvider> _domainModelsDefinitionsProvidersByProjectName;
+        private readonly IDictionary<VersionedPath, IDomainModelDefinitionsProvider> _domainModelsDefinitionsProvidersByProjectName;
 
         public AssemblyDataHelper(
             IJsonFileProvider jsonFileProvider,
@@ -34,10 +34,16 @@ namespace EdFi.Ods.CodeGen.Helpers
         }
 
         // last element is the assemblyName.
-        public string GetAssemblyName(string assemblyMetadataPath)
-            => Path.GetDirectoryName(assemblyMetadataPath)
+        public VersionedPath GetAssemblyName(string assemblyMetadataPath)
+        {
+            var parts = Path.GetDirectoryName(assemblyMetadataPath)
                 ?.Split(Path.DirectorySeparatorChar)
-                .LastOrDefault();
+                .Reverse()
+                .Take(2)
+                .ToArray();
+
+            return new VersionedPath(parts[1], parts[0]);
+        }
 
         public AssemblyData CreateAssemblyData(string assemblyMetadataPath)
         {
@@ -45,18 +51,19 @@ namespace EdFi.Ods.CodeGen.Helpers
 
             bool isExtension = assemblyMetadata.AssemblyModelType.EqualsIgnoreCase(TemplateSetConventions.Extension);
 
-            string assemblyName = GetAssemblyName(assemblyMetadataPath);
+            var versionedAssemblyName = GetAssemblyName(assemblyMetadataPath);
 
             var schemaName = isExtension
                 ? ExtensionsConventions.GetProperCaseNameForLogicalName(
-                    _domainModelsDefinitionsProvidersByProjectName[assemblyName]
+                    _domainModelsDefinitionsProvidersByProjectName[versionedAssemblyName]
                         .GetDomainModelDefinitions()
                         .SchemaDefinition.LogicalName)
                 : EdFiConventions.ProperCaseName;
 
             var assemblyData = new AssemblyData
             {
-                AssemblyName = assemblyName,
+                AssemblyName = versionedAssemblyName.Name,
+                ModelVersion = versionedAssemblyName.Version,
                 Path = Path.GetDirectoryName(assemblyMetadataPath),
                 TemplateSet = assemblyMetadata.AssemblyModelType,
                 IsProfile = assemblyMetadata.AssemblyModelType.EqualsIgnoreCase(TemplateSetConventions.Profile),
