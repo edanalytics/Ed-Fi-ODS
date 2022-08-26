@@ -6,6 +6,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using EdFi.Common;
 using EdFi.Common.Extensions;
 using EdFi.Ods.CodeGen.Conventions;
@@ -39,10 +40,19 @@ namespace EdFi.Ods.CodeGen.Helpers
             var parts = Path.GetDirectoryName(assemblyMetadataPath)
                 ?.Split(Path.DirectorySeparatorChar)
                 .Reverse()
-                .Take(2)
+                .Take(3)
                 .ToArray();
 
-            return new VersionedPath(parts[1], parts[0]);
+            // SPIKE: Does this match an extension / Ed-Fi permutation?
+            // No support in Spike for Profiles
+            var edFiVersionForExtensionMatch = Regex.Match(parts[0], "^Ed-Fi-([0-9][^\\/]*)$");
+            
+            if (edFiVersionForExtensionMatch.Success)
+            {
+                return new VersionedPath(parts[2], parts[1], edFiVersionForExtensionMatch.Groups[1].Value);
+            }
+
+            return new VersionedPath(parts[1], parts[0], null);
         }
 
         public AssemblyData CreateAssemblyData(string assemblyMetadataPath)
@@ -64,6 +74,7 @@ namespace EdFi.Ods.CodeGen.Helpers
             {
                 AssemblyName = versionedAssemblyName.Name,
                 ModelVersion = versionedAssemblyName.Version,
+                EdFiVersion = versionedAssemblyName.EdFiVersion,
                 Path = Path.GetDirectoryName(assemblyMetadataPath),
                 TemplateSet = assemblyMetadata.AssemblyModelType,
                 IsProfile = assemblyMetadata.AssemblyModelType.EqualsIgnoreCase(TemplateSetConventions.Profile),

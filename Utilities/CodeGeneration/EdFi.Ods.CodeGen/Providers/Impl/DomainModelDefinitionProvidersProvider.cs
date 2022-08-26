@@ -16,14 +16,15 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
 {
     public class DomainModelDefinitionProvidersProvider : IDomainModelDefinitionsProviderProvider
     {
-        private static readonly string _standardModelsPath = Path.Combine("Artifacts", "Metadata", "ApiModel.json");
-        private static readonly string _extensionModelsPath = Path.Combine("Artifacts", "Metadata", "ApiModel-EXTENSION.json");
+        private static readonly string _standardModelsRelativePath = Path.Combine("Artifacts", "Metadata", "ApiModel.json");
+        private static readonly string _extensionModelsRelativePath = Path.Combine("Artifacts", "Metadata", "ApiModel-EXTENSION.json");
         private readonly Lazy<Dictionary<VersionedPath, IDomainModelDefinitionsProvider>> _domainModelDefinitionProvidersByProjectName;
 
         private readonly string _solutionPath;
         private readonly ILog Logger = LogManager.GetLogger(typeof(DomainModelDefinitionProvidersProvider));
         private readonly IExtensionPluginsProvider _extensionPluginsProviderProvider;
         private readonly IIncludePluginsProvider _includePluginsProvider;
+        // private readonly IAssemblyDataProvider _assemblyDataProvider;
         private readonly string _extensionsPath;
 
         public DomainModelDefinitionProvidersProvider(
@@ -43,6 +44,7 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
             _extensionPluginsProviderProvider = extensionPluginsProviderProvider;
 
             _includePluginsProvider = includePluginsProvider;
+            // _assemblyDataProvider = assemblyDataProvider;
         }
 
         /// <summary>
@@ -101,40 +103,54 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
             }
 
             var modelProjects = directoriesToEvaluate
-                .Where(p => p.Name.IsExtensionAssembly() || p.Name.IsStandardAssembly());
+                .Where(p => p.Name.IsExtensionAssembly() || p.Name.IsStandardAssembly())
+                .ToArray();
 
+            var edFiVersions = modelProjects.Where(p => p.Name.IsStandardAssembly())
+                .SelectMany(p => p.GetDirectories().Where(d => char.IsNumber(Path.GetFileName(d.FullName)[0])))
+                .Select(p => Path.GetFileName(p.FullName))
+                .Distinct()
+                .ToArray();
+            
             foreach (var modelProject in modelProjects)
             {
-                var modelsRelativePath = modelProject.Name.IsStandardAssembly()
-                    ? _standardModelsPath
-                    : _extensionModelsPath;
+                bool isStandardAssembly = modelProject.Name.IsStandardAssembly();
+
+                var modelsRelativePath = isStandardAssembly ? _standardModelsRelativePath : _extensionModelsRelativePath;
 
                 var versionDirectories = Directory.GetDirectories(modelProject.FullName)
                     .Where(d => char.IsNumber(Path.GetFileName(d)[0]))
                     .ToArray();
 
+                var noEdFiVersionPermutations = new []{null as string};
+
                 foreach (string versionDirectory in versionDirectories)
                 {
-                    var metadataFile = new FileInfo(Path.Combine(versionDirectory, modelsRelativePath));
-
-                    Logger.Debug($"Loading ApiModels for {metadataFile}.");
-
-                    if (!metadataFile.Exists)
+                    foreach (string edFiVersion in isStandardAssembly ? noEdFiVersionPermutations : edFiVersions)
                     {
-                        throw new Exception(
-                            $"Unable to find model definitions file for extensions project {modelProject.Name} at location {metadataFile.FullName}.");
+                        string edFiVersionSegment = edFiVersion == null ? null : $"Ed-Fi-{edFiVersion}";
+                        var metadataFile = new FileInfo(Path.Combine(versionDirectory, edFiVersionSegment ?? "", modelsRelativePath));
+
+                        Logger.Debug($"Loading ApiModels for {metadataFile}.");
+
+                        if (!metadataFile.Exists)
+                        {
+                            throw new Exception(
+                                $"Unable to find model definitions file for extensions project {modelProject.Name} at location {metadataFile.FullName}.");
+                        }
+
+                        string version = Path.GetFileName(versionDirectory);
+                        var versionedPath = new VersionedPath(modelProject.Name, version, edFiVersion);
+
+                        if (domainModelDefinitionsByVersionedPath.ContainsKey(versionedPath))
+                        {
+                            throw new Exception($"Cannot process duplicate extension projects for '{modelProject.Name}' and version '{version}'.");
+                        }
+
+                        domainModelDefinitionsByVersionedPath.Add(
+                            versionedPath,
+                            new DomainModelDefinitionsJsonFileSystemProvider(metadataFile.FullName));
                     }
-
-                    string version = Path.GetFileName(versionDirectory);
-
-                    if (domainModelDefinitionsByVersionedPath.ContainsKey(new VersionedPath(modelProject.Name, version)))
-                    {
-                        throw new Exception($"Cannot process duplicate extension projects for '{modelProject.Name}' and version '{version}'.");
-                    }
-
-                    domainModelDefinitionsByVersionedPath.Add(
-                        new VersionedPath(modelProject.Name, version),
-                        new DomainModelDefinitionsJsonFileSystemProvider(metadataFile.FullName));
                 }
             }
 

@@ -22,8 +22,15 @@ namespace EdFi.Ods.CodeGen.Models
         public string SchemaName { get; set; }
 
         public string ModelVersion { get; set; }
+        
+        public string EdFiVersion { get; set; }
 
         public override string ToString()
             => $"AssemblyName: {AssemblyName}{Environment.NewLine}Model Version: {ModelVersion}{Environment.NewLine}Path: {Path}{Environment.NewLine}TemplateSet: {TemplateSet}";
+
+        public bool IsStandard
+        {
+            get => !IsProfile && !IsExtension;
+        }
     }
 }

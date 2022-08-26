@@ -3,8 +3,10 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EdFi.Common;
@@ -45,47 +47,61 @@ namespace EdFi.Ods.CodeGen.Processing.Impl
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            var templateContext = _templateContextProvider.Create(assemblyData);
+            var templateContexts = _templateContextProvider.Create(assemblyData);
 
-            foreach (var templateSet in _templateSetProvider.GetTemplatesByName(assemblyData.TemplateSet))
+            foreach (var templateContext in templateContexts)
             {
-                templateContext.With(templateSet);
-
-                _logger.Debug($"Generating code for template {templateSet.Name}");
-
-                var generator = _generatorProvider.GetGeneratorByDriverName(templateSet.Driver);
-
-                if (generator != null)
+                if (templateContext.EdFiStandardVersion != null)
                 {
-                    var templateStopwatch = new Stopwatch();
-                    templateStopwatch.Start();
-
-                    var model = generator.Generate(templateContext);
-
-                    _logger.Debug($"Generating template data for template {templateSet.Name}");
-
-                    string outputPath = Path.Combine(assemblyData.Path, templateSet.OutputPath);
-
-                    var codeGenWriterData = new TemplateWriterData
-                    {
-                        TemplateSet = templateSet,
-                        Model = model,
-                        OutputPath = outputPath
-                    };
-
-                    _logger.Debug($"Writing template data for path {outputPath}");
-
-                    await _templateWriter.WriteAsync(codeGenWriterData, cancellationToken)
-                        .ConfigureAwait(false);
-
-                    templateStopwatch.Stop();
-
-                    _logger.Debug(
-                        $"Code generation for template {templateSet.Name} completed in {templateStopwatch.Elapsed.ToString()}.");
+                    _logger.Debug($"Processing templates for schema '{templateContext.SchemaPhysicalName}, v{templateContext.ModelVersion}' (paired with Ed-Fi v{templateContext.EdFiStandardVersion})...");
                 }
                 else
                 {
-                    _logger.Debug($"TemplateSet model not found for {templateSet.Name}, skipping.");
+                    _logger.Debug($"Processing templates for schema '{templateContext.SchemaPhysicalName}, v{templateContext.ModelVersion}'...");
+                }
+
+                foreach (var templateSet in _templateSetProvider.GetTemplatesByName(assemblyData.TemplateSet))
+                {
+                    templateContext.With(templateSet);
+
+                    _logger.Debug($"Generating code for template {templateSet.Name}");
+
+                    var generator = _generatorProvider.GetGeneratorByDriverName(templateSet.Driver);
+
+                    if (generator != null)
+                    {
+                        var templateStopwatch = new Stopwatch();
+                        templateStopwatch.Start();
+
+                        var model = generator.Generate(templateContext);
+
+                        _logger.Debug($"Generating template data for template {templateSet.Name}");
+
+                        string edFiFolderName = (templateContext.EdFiStandardVersion == null) ? null : $"Ed-Fi-{templateContext.EdFiStandardVersion}";
+                        
+                        string outputPath = Path.Combine(assemblyData.Path, edFiFolderName, templateSet.OutputPath);
+
+                        var codeGenWriterData = new TemplateWriterData
+                        {
+                            TemplateSet = templateSet,
+                            Model = model,
+                            OutputPath = outputPath
+                        };
+
+                        _logger.Debug($"Writing template data for path {outputPath}");
+
+                        await _templateWriter.WriteAsync(codeGenWriterData, cancellationToken)
+                            .ConfigureAwait(false);
+
+                        templateStopwatch.Stop();
+
+                        _logger.Debug(
+                            $"Code generation for template {templateSet.Name} completed in {templateStopwatch.Elapsed.ToString()}.");
+                    }
+                    else
+                    {
+                        _logger.Debug($"TemplateSet model not found for {templateSet.Name}, skipping.");
+                    }
                 }
             }
 

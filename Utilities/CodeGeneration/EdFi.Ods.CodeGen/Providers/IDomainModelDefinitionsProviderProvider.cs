@@ -18,13 +18,19 @@ namespace EdFi.Ods.CodeGen.Providers
 
     public struct VersionedPath
     {
-        public VersionedPath(string name, string version)
+        public VersionedPath(string name, string version, string edFiVersion)
         {
             Name = name;
             Version = version;
+            EdFiVersion = edFiVersion;
         }
 
         public string Name { get; }
         public string Version { get; }
+        
+        /// <summary>
+        /// Gets the Ed-Fi version in context for the extension model/version indicated by the <see cref="Name" /> and <see cref="Version" /> properties.
+        /// </summary>
+        public string EdFiVersion { get; }
     }
 }

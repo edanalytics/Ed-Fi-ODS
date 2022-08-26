@@ -100,6 +100,11 @@ namespace EdFi.Ods.CodeGen.Models
         public TemplateSet TemplateSet { get; private set; }
 
         public string ModelVersion { get; set; }
+        
+        /// <summary>
+        /// For non-Ed-Fi standard template contexts, the associated Ed-Fi Standard version. 
+        /// </summary>
+        public string EdFiStandardVersion { get; set; }
 
         public void With(TemplateSet templateSet)
         {

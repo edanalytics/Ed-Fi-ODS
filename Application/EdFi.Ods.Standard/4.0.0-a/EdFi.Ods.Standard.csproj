@@ -24,8 +24,8 @@
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EdFi.Ods.Api\EdFi.Ods.Api.csproj" />
-    <ProjectReference Include="..\EdFi.Ods.Common\EdFi.Ods.Common.csproj" />
+    <ProjectReference Include="..\..\EdFi.Ods.Api\EdFi.Ods.Api.csproj" />
+    <ProjectReference Include="..\..\EdFi.Ods.Common\EdFi.Ods.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Artifacts\Metadata\ApiModel.json" />
