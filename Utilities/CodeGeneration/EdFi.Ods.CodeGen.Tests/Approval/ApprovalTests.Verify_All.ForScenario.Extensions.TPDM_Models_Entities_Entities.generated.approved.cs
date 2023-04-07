@@ -10514,7 +10514,7 @@ namespace EdFi.Ods.Entities.NHibernate.EvaluationElementRatingAggregate.TPDM
             set { EvaluationElementRating = (EvaluationElementRating) value; }
         }
 
-        [DomainSignature]
+        [DomainSignature][Range(typeof(decimal), "-999.999", "999.999")]
         public virtual decimal Rating  { get; set; }
         [DomainSignature, RequiredWithNonDefault, StringLength(50), NoDangerousText, NoWhitespace]
         public virtual string RatingResultTitle  { get; set; }
@@ -12308,7 +12308,7 @@ namespace EdFi.Ods.Entities.NHibernate.EvaluationObjectiveRatingAggregate.TPDM
             set { EvaluationObjectiveRating = (EvaluationObjectiveRating) value; }
         }
 
-        [DomainSignature]
+        [DomainSignature][Range(typeof(decimal), "-999.999", "999.999")]
         public virtual decimal Rating  { get; set; }
         [DomainSignature, RequiredWithNonDefault, StringLength(50), NoDangerousText, NoWhitespace]
         public virtual string RatingResultTitle  { get; set; }
@@ -13498,7 +13498,7 @@ namespace EdFi.Ods.Entities.NHibernate.EvaluationRatingAggregate.TPDM
             set { EvaluationRating = (EvaluationRating) value; }
         }
 
-        [DomainSignature]
+        [DomainSignature][Range(typeof(decimal), "-999.999", "999.999")]
         public virtual decimal Rating  { get; set; }
         [DomainSignature, RequiredWithNonDefault, StringLength(50), NoDangerousText, NoWhitespace]
         public virtual string RatingResultTitle  { get; set; }
@@ -17534,7 +17534,7 @@ namespace EdFi.Ods.Entities.NHibernate.PerformanceEvaluationRatingAggregate.TPDM
             set { PerformanceEvaluationRating = (PerformanceEvaluationRating) value; }
         }
 
-        [DomainSignature]
+        [DomainSignature][Range(typeof(decimal), "-999.999", "999.999")]
         public virtual decimal Rating  { get; set; }
         [DomainSignature, RequiredWithNonDefault, StringLength(50), NoDangerousText, NoWhitespace]
         public virtual string RatingResultTitle  { get; set; }

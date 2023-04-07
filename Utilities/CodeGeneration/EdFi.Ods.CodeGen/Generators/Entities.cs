@@ -272,7 +272,8 @@ namespace EdFi.Ods.CodeGen.Generators
                                                                                      || IsNonDerivedDateProperty(entity, p)
                                                                                      || IsDateTimeProperty(p)
                                                                                      || IsDelegatedToBaseProperty(entity, p)),
-                                                              PropertyAccessors = GetPropertyAccessors(entity, p)
+                                                              PropertyAccessors = GetPropertyAccessors(entity, p),
+                                                              RangeAttribute = p.ToRangeAttributeCSharp()
                                                           })
                                      },
                         InheritedProperties = entity.IsDerived
@@ -329,17 +330,7 @@ namespace EdFi.Ods.CodeGen.Generators
                                                                     }
                                                                   : new string[0]
                                                           )),
-                                                  RangeAttribute = PropertyHasPrecisionAndScale(p)
-                                                      ? new
-                                                        {
-                                                            CSharpBaseType = p.PropertyType.ToCSharp(), MinimumRangeValue =
-                                                                "-".PadRight(p.PropertyType.Precision - p.PropertyType.Scale + 1, '9')
-                                                                + ".".PadRight(p.PropertyType.Scale + 1, '9'),
-                                                            MaximumRangeValue =
-                                                                "".PadRight(p.PropertyType.Precision - p.PropertyType.Scale, '9')
-                                                                + ".".PadRight(p.PropertyType.Scale + 1, '9')
-                                                        }
-                                                      : _notRendered,
+                                                  RangeAttribute = p.ToRangeAttributeCSharp(),
                                                   IsStandardProperty =
                                                       !(p.IsDescriptorUsage
                                                         || UniqueIdSpecification.IsUSI(p.PropertyName)
@@ -534,12 +525,7 @@ namespace EdFi.Ods.CodeGen.Generators
                     };
             }
         }
-
-        private static bool PropertyHasPrecisionAndScale(EntityProperty p)
-        {
-            return p.PropertyType.Precision != 0 && p.PropertyType.Scale != 0;
-        }
-
+        
         private static bool IsSynchronizedProperty(EntityProperty property)
         {
             return property.PropertyName != "Id"
@@ -662,6 +648,12 @@ namespace EdFi.Ods.CodeGen.Generators
 
         private static bool CSharpDefaultHasDomainMeaning(EntityProperty property)
         {
+            // Any min/max range definition implies domain meaning
+            if (property.PropertyType.MinValue.HasValue || property.PropertyType.MaxValue.HasValue)
+            {
+                return true;
+            }
+
             switch (property.PropertyType.ToCSharp())
             {
                 case "string":

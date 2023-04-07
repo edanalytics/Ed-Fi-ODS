@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 // Licensed to the Ed-Fi Alliance under one or more agreements.
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
@@ -107,22 +107,63 @@ namespace EdFi.Ods.CodeGen.Extensions
         /// </summary>
         /// <param name="property"></param>
         /// <returns></returns>
-        public static string ToRangeAttributeCSharp(this ResourceProperty property)
+        public static string ToRangeAttributeCSharp(this EntityProperty property)
         {
-            //TODO SqlServer specific
-            switch (property.EntityProperty.PropertyType.DbType)
+            switch (property.PropertyType.DbType)
             {
                 case DbType.Decimal:
-
-                    return string.Format(
-                        "[Range(typeof(decimal), \"-{0}.{1}\", \"{0}.{1}\")]",
+                    var minPrecisionScaleValue = Convert.ToDecimal(string.Format(
+                        "-{0}.{1}",
                         new string(
                             '9',
-                            property.EntityProperty.PropertyType.Precision - property.EntityProperty.PropertyType.Scale),
-                        new string('9', property.EntityProperty.PropertyType.Scale));
+                            property.PropertyType.Precision - property.PropertyType.Scale),
+                        new string('9', property.PropertyType.Scale)));
+
+                    var rangeMinValue = Math.Max(minPrecisionScaleValue, property.PropertyType.MinValue ?? minPrecisionScaleValue);
+
+                    var maxPrecisionScaleValue = Convert.ToDecimal(string.Format(
+                        "{0}.{1}",
+                        new string(
+                            '9',
+                            property.PropertyType.Precision - property.PropertyType.Scale),
+                        new string('9', property.PropertyType.Scale)));
+
+                    var rangeMaxValue = Math.Min(maxPrecisionScaleValue, property.PropertyType.MaxValue ?? maxPrecisionScaleValue);
+
+                    if (rangeMinValue > rangeMaxValue)
+                    {
+                        throw new ArgumentException(
+                            "A domain range was defined that does not fall within the range of values valid for storage by the API");
+                    }
+
+                    return $"[Range(typeof(decimal), \"{rangeMinValue}\", \"{rangeMaxValue}\")]";
+
+                case DbType.Int32:
+
+                    if (!property.PropertyType.MinValue.HasValue && !property.PropertyType.MaxValue.HasValue)
+                    {
+                        return null;
+                    }
+
+                    return string.Format(
+                        "[Range({0}, {1})]",
+                        property.PropertyType.MinValue ?? int.MinValue,
+                        property.PropertyType.MaxValue ?? int.MaxValue);
 
                 case DbType.Currency:
-                    return "[Range(typeof(decimal), \"-922337203685477.5808\", \"922337203685477.5807\")]";
+                    var minCurrencyValue = -922337203685477.5808M;
+                    var maxCurrencyValue = 922337203685477.5807M;
+
+                    var rangeCurrencyMinValue = Math.Max(minCurrencyValue, property.PropertyType.MinValue ?? minCurrencyValue);
+                    var rangeCurrencyMaxValue = Math.Min(maxCurrencyValue, property.PropertyType.MaxValue ?? maxCurrencyValue);
+
+                    if (rangeCurrencyMinValue > rangeCurrencyMaxValue)
+                    {
+                        throw new ArgumentException(
+                            "A domain range was defined that does not fall within the range of values valid for storage by the API");
+                    }
+
+                    return $"[Range(typeof(decimal), \"{rangeCurrencyMinValue}\", \"{rangeCurrencyMaxValue}\")]";
 
                 default:
                     return null;
