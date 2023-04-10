@@ -35,6 +35,8 @@ namespace EdFi.Ods.Common.Models.Domain
 
             DbType = dbType;
             IsNullable = isNullable;
+            MinValue = minValue;
+            MaxValue = maxValue;
         }
 
         public bool IsNullable { get; }
