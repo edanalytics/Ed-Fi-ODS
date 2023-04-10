@@ -86,6 +86,8 @@ namespace EdFi.Ods.CodeGen.Providers.Impl
                 "Unable to find profile '{0}'.");
         }
 
+        public IReadOnlyDictionary<string, XElement> ProfileDefinitionsByName => throw new NotImplementedException();
+
         List<ProfileAndResourceNames> IProfileResourceNamesProvider.GetProfileResourceNames() => _profileResources.Value;
 
         private IDictionary<string, XElement> LazyInitializeProfileDefinitions()
