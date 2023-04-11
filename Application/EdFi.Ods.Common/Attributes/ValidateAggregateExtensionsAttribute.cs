@@ -88,7 +88,7 @@ namespace EdFi.Ods.Common.Attributes
                 if (association.Association.Cardinality == Cardinality.OneToOne
                     || association.Association.Cardinality == Cardinality.OneToZeroOrOne)
                 {
-                    ValidateEmbeddedObject(enumerable, context, compositeResults);
+                    ValidateEmbeddedObject(association, enumerable, context, compositeResults);
                 }
                 else
                 {
@@ -161,6 +161,7 @@ namespace EdFi.Ods.Common.Attributes
         }
 
         private void ValidateEmbeddedObject(
+            AssociationView association,
             IList enumerable,
             ValidationContext context,
             CompositeValidationResult compositeResults)
@@ -168,6 +169,14 @@ namespace EdFi.Ods.Common.Attributes
             // No embedded object to validate?
             if (enumerable.Count == 0)
             {
+                if (IsRequiredEmbeddedObject(association))
+                {
+                    AppendValidationResults(
+                        compositeResults,
+                        new ValidationResult(
+                            $"{association.Name} ({association.OtherEntity.SchemaProperCaseName()}) is required."));
+                }
+
                 return;
             }
 
@@ -213,6 +222,12 @@ namespace EdFi.Ods.Common.Attributes
         {
             // Determine if the aggregate extension is a required collection
             return association.Association.Cardinality == Cardinality.OneToOneOrMore;
+        }
+
+        private bool IsRequiredEmbeddedObject(AssociationView association)
+        {
+            // Determine if the aggregate extension is a required collection
+            return association.Association.Cardinality == Cardinality.OneToOne;
         }
 
         private AssociationView GetExtensionBagNameAssociation(string extensionBagName)
