@@ -119,6 +119,8 @@ namespace EdFi.Ods.Common.Infrastructure.Configuration
 
             configuration.AddCreateDateHooks();
 
+            configuration.SetProperty("connection.driver_class", typeof(MicrosoftDataSqlClientDriver).AssemblyQualifiedName);
+
             return configuration;
 
             void SetAssemblyBinding()
