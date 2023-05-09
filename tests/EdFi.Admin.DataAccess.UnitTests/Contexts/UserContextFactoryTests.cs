@@ -16,7 +16,7 @@ using System.Data.Entity;
 namespace EdFi.Admin.DataAccess.UnitTests.Contexts
 {
     [TestFixture]
-    public class UserContextFactoryTestsnhibernateconfuser
+    public class UserContextFactoryTests
     {
         // Not using TestFixtureBase because the tests are too simple to merit it.
 
