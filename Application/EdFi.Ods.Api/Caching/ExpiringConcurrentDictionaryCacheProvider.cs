@@ -28,6 +28,9 @@ namespace EdFi.Ods.Api.Caching
         private Timer _timer;
         private readonly bool _cacheEnabled = true;
 
+        private int _hits = 0;
+        private int _misses = 0;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpiringConcurrentDictionaryCacheProvider{TKey}" /> class using the
         /// specified recurring expiration period.
@@ -66,7 +69,22 @@ namespace EdFi.Ods.Api.Caching
         {
             if (_cacheEnabled)
             {
-                return _cacheDictionary.TryGetValue(key, out value);
+                if (_cacheDictionary.TryGetValue(key, out value))
+                {
+                    if (_logger.IsDebugEnabled)
+                    {
+                        Interlocked.Increment(ref _hits);
+                        _logger.Debug($"{nameof(ExpiringConcurrentDictionaryCacheProvider<TKey>)} cache '{_description}' HIT ({_hits} hits, {_misses} misses).");
+                    }
+
+                    return true;
+                }
+
+                if (_logger.IsDebugEnabled)
+                {
+                    Interlocked.Increment(ref _misses);
+                    _logger.Debug($"{nameof(ExpiringConcurrentDictionaryCacheProvider<TKey>)} cache '{_description}' MISS ({_hits} hits, {_misses} misses).");
+                }
             }
 
             value = null;
@@ -93,9 +111,11 @@ namespace EdFi.Ods.Api.Caching
         {
             if (_logger.IsDebugEnabled)
             {
-                _logger.Debug($"{nameof(ExpiringConcurrentDictionaryCacheProvider<TKey>)} cache '{_description}' expired ({_cacheDictionary.Count} entries cleared).");
+                _logger.Debug($"{nameof(ExpiringConcurrentDictionaryCacheProvider<TKey>)} cache '{_description}' expired ({_cacheDictionary.Count} entries cleared after {_hits} hits and {_misses} misses).");
             }
 
+            Interlocked.Exchange(ref _hits, 0); 
+            Interlocked.Exchange(ref _misses, 0); 
             _cacheDictionary.Clear();
 
             _expirationCallback?.Invoke();

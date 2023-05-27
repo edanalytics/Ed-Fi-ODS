@@ -49,6 +49,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
         private readonly ILog _logger = LogManager.GetLogger(typeof(CompositeResourceResponseProvider));
         private readonly IPersonUniqueIdToUsiCache _personUniqueIdToUsiCache;
         private readonly IProfileResourceModelProvider _profileResourceModelProvider;
+        private readonly IApiKeyContextProvider _apiKeyContextProvider;
         private readonly IResourceModelProvider _resourceModelProvider;
         private readonly ISessionFactory _sessionFactory;
 
@@ -58,7 +59,8 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
             IResourceModelProvider resourceModelProvider,
             IPersonUniqueIdToUsiCache personUniqueIdToUsiCache,
             IFieldsExpressionParser fieldsExpressionParser,
-            IProfileResourceModelProvider profileResourceModelProvider)
+            IProfileResourceModelProvider profileResourceModelProvider,
+            IApiKeyContextProvider apiKeyContextProvider)
         {
             _sessionFactory = sessionFactory;
             _compositeDefinitionProcessor = compositeDefinitionProcessor;
@@ -66,6 +68,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
             _personUniqueIdToUsiCache = personUniqueIdToUsiCache;
             _fieldsExpressionParser = fieldsExpressionParser;
             _profileResourceModelProvider = profileResourceModelProvider;
+            _apiKeyContextProvider = apiKeyContextProvider;
         }
 
         public object Get(
@@ -161,11 +164,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
         private IResourceModel GetResourceModel()
         {
             // Determine caller's assigned profiles
-            var assignedProfileNames =
-                ClaimsPrincipal.Current.Claims
-                               .Where(c => c.Type == EdFiOdsApiClaimTypes.Profile)
-                               .Select(c => c.Value)
-                               .ToArray();
+            var assignedProfileNames = _apiKeyContextProvider.GetApiKeyContext().Profiles;
 
             if (assignedProfileNames.Any())
             {
