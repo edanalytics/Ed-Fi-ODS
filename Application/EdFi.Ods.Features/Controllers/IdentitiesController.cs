@@ -32,7 +32,7 @@ namespace EdFi.Ods.Features.Controllers
     [ApiController]
     [Produces("application/json")]
     [RouteRootContext(RouteContextType.Ods)]
-    [Route($"{IdentityManagementConstants.IdentityRoutePrefix}/identities")]    
+    [Route($"{IdentityManagementConstants.IdentityRoutePrefix}/identities")]
     public class IdentitiesController : ControllerBase
     {
         private const string InvalidServerResponse = "Invalid response from identity service: ";
