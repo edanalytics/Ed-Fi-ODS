@@ -17,9 +17,9 @@ public class RelationshipsWithEdOrgsAndPeopleIncludingDeletesAuthorizationStrate
 {
     public RelationshipsWithEdOrgsAndPeopleIncludingDeletesAuthorizationStrategyFilterDefinitionsFactory(
         IEducationOrganizationIdNamesProvider educationOrganizationIdNamesProvider,
-        IApiKeyContextProvider apiKeyContextProvider,
+        IApiClientContextProvider apiClientContextProvider,
         IViewBasedSingleItemAuthorizationQuerySupport viewBasedSingleItemAuthorizationQuerySupport)
-        : base(educationOrganizationIdNamesProvider, apiKeyContextProvider, viewBasedSingleItemAuthorizationQuerySupport) { }
+        : base(educationOrganizationIdNamesProvider, apiClientContextProvider, viewBasedSingleItemAuthorizationQuerySupport) { }
 
     public override IReadOnlyList<AuthorizationFilterDefinition> CreateAuthorizationFilterDefinitions()
     {

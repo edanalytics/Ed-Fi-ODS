@@ -90,8 +90,8 @@ namespace EdFi.Ods.Api.Container.Modules
                 .As<IRouteRootTemplateProvider>()
                 .SingleInstance();
 
-            builder.RegisterType<ApiKeyContextProvider>()
-                .As<IApiKeyContextProvider>()
+            builder.RegisterType<ApiClientContextProvider>()
+                .As<IApiClientContextProvider>()
                 .SingleInstance();
 
             builder.RegisterType<CallContextStorage>()

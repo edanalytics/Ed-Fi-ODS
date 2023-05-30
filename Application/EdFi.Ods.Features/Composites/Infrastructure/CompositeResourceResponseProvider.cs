@@ -49,7 +49,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
         private readonly ILog _logger = LogManager.GetLogger(typeof(CompositeResourceResponseProvider));
         private readonly IPersonUniqueIdToUsiCache _personUniqueIdToUsiCache;
         private readonly IProfileResourceModelProvider _profileResourceModelProvider;
-        private readonly IApiKeyContextProvider _apiKeyContextProvider;
+        private readonly IApiClientContextProvider _apiClientContextProvider;
         private readonly IResourceModelProvider _resourceModelProvider;
         private readonly ISessionFactory _sessionFactory;
 
@@ -60,7 +60,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
             IPersonUniqueIdToUsiCache personUniqueIdToUsiCache,
             IFieldsExpressionParser fieldsExpressionParser,
             IProfileResourceModelProvider profileResourceModelProvider,
-            IApiKeyContextProvider apiKeyContextProvider)
+            IApiClientContextProvider apiClientContextProvider)
         {
             _sessionFactory = sessionFactory;
             _compositeDefinitionProcessor = compositeDefinitionProcessor;
@@ -68,7 +68,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
             _personUniqueIdToUsiCache = personUniqueIdToUsiCache;
             _fieldsExpressionParser = fieldsExpressionParser;
             _profileResourceModelProvider = profileResourceModelProvider;
-            _apiKeyContextProvider = apiKeyContextProvider;
+            _apiClientContextProvider = apiClientContextProvider;
         }
 
         public object Get(
@@ -164,7 +164,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
         private IResourceModel GetResourceModel()
         {
             // Determine caller's assigned profiles
-            var assignedProfileNames = _apiKeyContextProvider.GetApiKeyContext().Profiles;
+            var assignedProfileNames = _apiClientContextProvider.GetApiClientContext().Profiles;
 
             if (assignedProfileNames.Any())
             {

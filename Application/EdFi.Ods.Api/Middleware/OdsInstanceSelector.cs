@@ -18,38 +18,38 @@ namespace EdFi.Ods.Api.Middleware;
 /// </summary>
 public class OdsInstanceSelector : IOdsInstanceSelector
 {
-    private readonly IApiKeyContextProvider _apiKeyContextProvider;
+    private readonly IApiClientContextProvider _apiClientContextProvider;
     private readonly IOdsInstanceConfigurationProvider _odsInstanceConfigurationProvider;
 
     public OdsInstanceSelector(
-        IApiKeyContextProvider apiKeyContextProvider,
+        IApiClientContextProvider apiClientContextProvider,
         IOdsInstanceConfigurationProvider odsInstanceConfigurationProvider)
     {
-        _apiKeyContextProvider = apiKeyContextProvider;
+        _apiClientContextProvider = apiClientContextProvider;
         _odsInstanceConfigurationProvider = odsInstanceConfigurationProvider;
     }
 
     /// <inheritdoc cref="IOdsInstanceSelector.GetOdsInstanceAsync" />
     public async Task<OdsInstanceConfiguration> GetOdsInstanceAsync(IReadOnlyDictionary<string, object> routeValues)
     {
-        var apiKeyContext = _apiKeyContextProvider.GetApiKeyContext();
+        var apiClientContext = _apiClientContextProvider.GetApiClientContext();
 
-        if (apiKeyContext == null || apiKeyContext == ApiKeyContext.Empty)
+        if (apiClientContext == null || apiClientContext == ApiClientContext.Empty)
         {
             return null;
         }
 
-        if (apiKeyContext.OdsInstanceIds.Count == 0)
+        if (apiClientContext.OdsInstanceIds.Count == 0)
         {
             throw new ApiSecurityConfigurationException("The API client has not been associated with an ODS instance.");
         }
 
-        if (apiKeyContext.OdsInstanceIds.Count == 1)
+        if (apiClientContext.OdsInstanceIds.Count == 1)
         {
-            return await _odsInstanceConfigurationProvider.GetByIdAsync(apiKeyContext.OdsInstanceIds[0]);
+            return await _odsInstanceConfigurationProvider.GetByIdAsync(apiClientContext.OdsInstanceIds[0]);
         }
 
-        foreach (int odsInstanceId in apiKeyContext.OdsInstanceIds)
+        foreach (int odsInstanceId in apiClientContext.OdsInstanceIds)
         {
             var odsInstanceConfiguration = await _odsInstanceConfigurationProvider.GetByIdAsync(odsInstanceId);
 
