@@ -3,6 +3,7 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
+using System;
 using System.Data;
 using EdFi.Ods.Common.Exceptions;
 using Newtonsoft.Json;
@@ -50,9 +51,9 @@ namespace EdFi.Ods.Common.Models.Domain
 
         public int MaxLength { get; }
 
-        public decimal? MinValue { get; }
+        public decimal? MinValue { get; set; }
 
-        public decimal? MaxValue { get; }
+        public decimal? MaxValue { get; set; }
 
         private static void ValidatePrecisionAndScale(int precision, int scale)
         {
