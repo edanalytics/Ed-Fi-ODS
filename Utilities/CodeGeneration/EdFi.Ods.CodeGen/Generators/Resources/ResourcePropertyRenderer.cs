@@ -358,6 +358,11 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
                 .ToList();
         }
 
+        public bool HasRequiredMembersWithMeaningfulDefaultValues(ResourceClassBase resource)
+        {
+            return CreateProperties(resource).Any(p => p.PropertyDefaultHasDomainMeaning);
+        }
+
         private IList<object> CreatePropertyDtos(IEnumerable<PropertyData> propertiesToRender)
         {
             return propertiesToRender.Select(PropertyData.CreatePropertyDto)
