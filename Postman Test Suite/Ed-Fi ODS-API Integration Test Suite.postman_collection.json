@@ -5517,10 +5517,11 @@
 													"  pm.expect(pm.response.code).to.equal(400);\r",
 													"});\r",
 													"\r",
-													"pm.test(\"Should return a message indicating that FiscalYear is required\", () => {\r",
-													"\r",
+													"pm.test(\"Should return a message indicating that FiscalYear was not explicitly assigned\", () => {\r",
 													"  const responseItem = pm.response.json();\r",
-													"  pm.expect(responseItem.message).to.include(\"FiscalYear is required\");\r",
+													"\r",
+													"  pm.expect(responseItem.message).to.equal(\"The request is invalid.\");\r",
+													"  pm.expect(responseItem.modelState[\"request.FiscalYear\"]).to.contain(\"Required value not explicitly assigned.\");\r",
 													"});"
 												],
 												"type": "text/javascript"
@@ -5589,10 +5590,11 @@
 													"  pm.expect(pm.response.code).to.equal(400);\r",
 													"});\r",
 													"\r",
-													"pm.test(\"Should return a message indicating that FiscalYear is required\", () => {\r",
-													"\r",
+													"pm.test(\"Should return a message indicating that FiscalYear was not explicitly assigned\", () => {\r",
 													"  const responseItem = pm.response.json();\r",
-													"  pm.expect(responseItem.message).to.include(\"FiscalYear is required\");\r",
+													"\r",
+													"  pm.expect(responseItem.message).to.equal(\"The request is invalid.\");\r",
+													"  pm.expect(responseItem.modelState[\"request.FiscalYear\"]).to.contain(\"Required value not explicitly assigned.\");\r",
 													"});"
 												],
 												"type": "text/javascript"
@@ -5661,10 +5663,11 @@
 													"  pm.expect(pm.response.code).to.equal(400);\r",
 													"});\r",
 													"\r",
-													"pm.test(\"Should return a message indicating that FiscalYear is required\", () => {\r",
-													"\r",
+													"pm.test(\"Should return a message indicating that FiscalYear was not explicitly assigned\", () => {\r",
 													"  const responseItem = pm.response.json();\r",
-													"  pm.expect(responseItem.message).to.include(\"FiscalYear is required\");\r",
+													"\r",
+													"  pm.expect(responseItem.message).to.equal(\"The request is invalid.\");\r",
+													"  pm.expect(responseItem.modelState[\"request.FiscalYear\"]).to.contain(\"Required value not explicitly assigned.\");\r",
 													"});"
 												],
 												"type": "text/javascript"
@@ -6008,10 +6011,11 @@
 													"  pm.expect(pm.response.code).to.equal(400);\r",
 													"});\r",
 													"\r",
-													"pm.test(\"Should return a message indicating that FiscalYear is required\", () => {\r",
-													"\r",
+													"pm.test(\"Should return a message indicating that FiscalYear was not explicitly assigned\", () => {\r",
 													"  const responseItem = pm.response.json();\r",
-													"  pm.expect(responseItem.message).to.include(\"FiscalYear is required\");\r",
+													"\r",
+													"  pm.expect(responseItem.message).to.equal(\"The request is invalid.\");\r",
+													"  pm.expect(responseItem.modelState[\"request.FiscalYear\"]).to.contain(\"Required value not explicitly assigned.\");\r",
 													"});"
 												],
 												"type": "text/javascript"
