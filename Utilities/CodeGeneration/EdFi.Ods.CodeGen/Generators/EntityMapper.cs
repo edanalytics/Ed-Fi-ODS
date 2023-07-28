@@ -75,7 +75,9 @@ namespace EdFi.Ods.CodeGen.Generators
                        ModelParentName = resourceClass.Entity?.Parent?.Name ?? resourceClass.Name.TrimSuffix("Extension"),
                        ExtensionName = TemplateContext.SchemaProperCaseName, IsEntityExtension = resourceClass.IsResourceExtensionClass,
                        BaseClassName = resourceClass.Entity?.BaseEntity?.Name, AllowPrimaryKeyUpdates = resourceClass.Entity?.Identifier.IsUpdatable,
-                       AnnotatedLocalPrimaryKeyList = AnnotateLocalIdentifyingPropertyKeys(resourceClass.Entity), BackSynchedPrimaryKeyList =
+                       AnnotatedLocalPrimaryKeyList = AnnotateLocalIdentifyingPropertyKeys(resourceClass.Entity), 
+                       AnnotatedLocalPrimaryKeyHasStrings = resourceClass.Entity?.ContextualIdentifyingProperties.Any(p => p.PropertyType.IsString()),
+                       BackSynchedPrimaryKeyList =
                            resourceClass.IdentifyingProperties
                                         .Where(p => !IsDefiningUniqueId(resourceClass, p))
                                         .OrderBy(x => x.PropertyName)
@@ -221,22 +223,27 @@ namespace EdFi.Ods.CodeGen.Generators
             }
 
             var contextualIdList = entity.ContextualIdentifyingProperties
-                                         .Select(x => x.GetModelsInterfacePropertyName())
-                                         .OrderBy(s => s)
-                                         .ToList();
+                .Select(
+                    x => new
+                    {
+                        Name = x.GetModelsInterfacePropertyName(),
+                        IsString = x.PropertyType.IsString(),
+                    })
+                .OrderBy(x => x.Name)
+                .ToList();
 
             if (!contextualIdList.Any())
             {
                 return new List<object>();
             }
 
-            string first = contextualIdList.First();
-            string last = contextualIdList.Last();
-
             return contextualIdList.Select(
-                x => new
+                (x, i) => new
                      {
-                         PrimaryKeyName = x, NotFirst = x != first, IsLast = x == last
+                         PrimaryKeyName = x.Name,
+                         IsString = x.IsString,
+                         IsFirst = i == 0,
+                         IsLast = i == contextualIdList.Count - 1,
                      });
         }
 
