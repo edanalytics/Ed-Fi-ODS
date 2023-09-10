@@ -47,6 +47,7 @@ namespace EdFi.Ods.Api.Container.Modules
 
             builder.RegisterType<MemoryCacheProvider>()
                 .As<ICacheProvider>()
+                .AsSelf()
                 .SingleInstance();
 
             builder.RegisterType<ConcurrentDictionaryCacheProvider>()
@@ -130,17 +131,17 @@ namespace EdFi.Ods.Api.Container.Modules
                 .PreserveExistingDefaults()
                 .SingleInstance();
 
-            builder.RegisterType<InProcessMapCache<(ulong odsInstanceHashId, string personType), string, int>>()
+            builder.RegisterType<InMemoryMapCache<(ulong odsInstanceHashId, string personType), string, int>>()
                 // TODO: Rationalize the use of expiring concurrent dictionary with the legacy option for rolling expiration, implying a need for MemoryCache
-                .WithParameter(
-                    ctx =>
-                    {
-                        var apiSettings = ctx.Resolve<ApiSettings>();
-
-                        return (ICacheProvider<(ulong odsInstanceHashId, string personType)>) new ExpiringConcurrentDictionaryCacheProvider<(ulong odsInstanceHashId, string personType)>(
-                            "In-memory Person Map Cache",
-                            TimeSpan.FromSeconds(apiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds));
-                    })
+                // .WithParameter(
+                //     ctx =>
+                //     {
+                //         var apiSettings = ctx.Resolve<ApiSettings>();
+                //
+                //         return (ICacheProvider<(ulong odsInstanceHashId, string personType)>) new ExpiringConcurrentDictionaryCacheProvider<(ulong odsInstanceHashId, string personType)>(
+                //             "In-memory Person Map Cache",
+                //             TimeSpan.FromSeconds(apiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds));
+                //     })
                 .WithParameter(
                     new ResolvedParameter(
                         (p, c) => p.Name.Equals("slidingExpiration", StringComparison.InvariantCultureIgnoreCase),
@@ -165,6 +166,7 @@ namespace EdFi.Ods.Api.Container.Modules
 
                             return TimeSpan.FromSeconds(period);
                         }))
+                // TODO: This may no longer be the place to suppress caching for person uniqueId/USI caching
                 .WithParameter(
                     new ResolvedParameter(
                         (p, c) => p.Name.Equals("suppressStudentCache", StringComparison.InvariantCultureIgnoreCase),
@@ -195,7 +197,7 @@ namespace EdFi.Ods.Api.Container.Modules
                 .As<IMapCache<(ulong odsInstanceHashId, string personType), string, int>>()
                 .SingleInstance();
             
-            builder.RegisterType<InProcessMapCache<(ulong odsInstanceHashId, string personType), int, string>>()
+            builder.RegisterType<InMemoryMapCache<(ulong odsInstanceHashId, string personType), int, string>>()
                 // TODO: Rationalize the use of expiring concurrent dictionary with the legacy option for rolling expiration, implying a need for MemoryCache
                 .WithParameter(
                     ctx =>
