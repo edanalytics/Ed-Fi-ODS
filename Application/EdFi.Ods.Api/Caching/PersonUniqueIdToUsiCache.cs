@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 
 namespace EdFi.Ods.Api.Caching
 {
+    /*
     public class PersonUniqueIdToUsiCache : IPersonUniqueIdToUsiCache
     {
         private const string CacheKeyPrefix = "IdentityValueMaps_";
@@ -32,7 +33,7 @@ namespace EdFi.Ods.Api.Caching
         private readonly ICacheProvider _cacheProvider;
         private readonly IEdFiOdsInstanceIdentificationProvider _edFiOdsInstanceIdentificationProvider;
 
-        private readonly ReaderWriterLockSlim _identityValueMapsLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim _identityValueMapsLock = new();
 
         private readonly ILog _logger = LogManager.GetLogger(typeof(PersonUniqueIdToUsiCache));
         private readonly IPersonIdentifiersProvider _personIdentifiersProvider;
@@ -428,9 +429,14 @@ namespace EdFi.Ods.Api.Caching
             return valueMap.Usi;
         }
 
+
+        private ConcurrentDictionary<ulong, string> _odsInstanceKeyByIdentifier = new();
+        
         private string GetUsiKeyTokenContext()
         {
-            return $"from_{_edFiOdsInstanceIdentificationProvider.GetInstanceIdentification()}";
+            return _odsInstanceKeyByIdentifier.GetOrAdd(
+                _edFiOdsInstanceIdentificationProvider.GetInstanceIdentification(),
+                ctx => $"ods:{ctx}");
         }
 
         public class IdentityValueMaps
@@ -503,4 +509,5 @@ namespace EdFi.Ods.Api.Caching
             }
         }
     }
+    */
 }

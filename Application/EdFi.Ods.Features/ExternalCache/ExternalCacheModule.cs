@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 // Licensed to the Ed-Fi Alliance under one or more agreements.
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
@@ -43,7 +43,7 @@ namespace EdFi.Ods.Features.ExternalCache
 
             if (ApiSettings.Caching.PersonUniqueIdToUsi.UseExternalCache)
             {
-                OverridePersonUniqueIdtoUsiCache(builder);
+                OverridePersonUniqueIdToUsiCache(builder);
             }
         }
 
@@ -103,64 +103,49 @@ namespace EdFi.Ods.Features.ExternalCache
                 .SingleInstance();
         }
 
-        public void OverridePersonUniqueIdtoUsiCache(ContainerBuilder builder)
+        public void OverridePersonUniqueIdToUsiCache(ContainerBuilder builder)
         {
-            builder.RegisterType<PersonUniqueIdToUsiCache>()
-            .WithParameter(new NamedParameter("synchronousInitialization", false))
-            .WithParameter(
-                new ResolvedParameter(
-                  (p, c) => p.Name.Equals("cacheProvider", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      int period = ApiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
-                      int expirationPeriod = ApiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+            throw new NotImplementedException();
 
-                      return new ExternalCacheProvider(
-                              c.Resolve<IDistributedCache>(),
-                              TimeSpan.FromSeconds(period),
-                              TimeSpan.FromSeconds(expirationPeriod));
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("slidingExpiration", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      int period = ApiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
-
-                      return TimeSpan.FromSeconds(period);
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("absoluteExpirationPeriod", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      int period = ApiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
-
-                      return TimeSpan.FromSeconds(period);
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("suppressStudentCache", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      return ApiSettings.Caching.PersonUniqueIdToUsi.SuppressStudentCache;
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("suppressStaffCache", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      return ApiSettings.Caching.PersonUniqueIdToUsi.SuppressStaffCache;
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("suppressParentCache", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      return ApiSettings.Caching.PersonUniqueIdToUsi.SuppressParentCache;
-                  }))
-          .As<IPersonUniqueIdToUsiCache>()
-          .SingleInstance();
+            // builder.RegisterType<PersonUniqueIdToUsiCache>()
+            //     .WithParameter(new NamedParameter("synchronousInitialization", false))
+            //     .WithParameter(
+            //         new ResolvedParameter(
+            //           (p, c) => p.ParameterType == typeof(ICacheProvider<string>),
+            //           (p, c) =>
+            //           {
+            //               int period = ApiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
+            //               int expirationPeriod = ApiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+            //
+            //               return new ExternalCacheProvider<string>(
+            //                       c.Resolve<IDistributedCache>(),
+            //                       TimeSpan.FromSeconds(period),
+            //                       TimeSpan.FromSeconds(expirationPeriod));
+            //           }))
+            //   .WithParameter(
+            //       new ResolvedParameter(
+            //           (p, c) => p.Name.Equals("slidingExpiration", StringComparison.OrdinalIgnoreCase),
+            //           (p, c) =>
+            //           {
+            //               int period = ApiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
+            //
+            //               return TimeSpan.FromSeconds(period);
+            //           }))
+            //   .WithParameter(
+            //       new ResolvedParameter(
+            //           (p, c) => p.Name.Equals("absoluteExpirationPeriod", StringComparison.OrdinalIgnoreCase),
+            //           (p, c) =>
+            //           {
+            //               int period = ApiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+            //
+            //               return TimeSpan.FromSeconds(period);
+            //           }))
+            //   .WithParameter(
+            //       new ResolvedParameter(
+            //           (p, c) => p.Name.Equals("cacheSuppression", StringComparison.OrdinalIgnoreCase),
+            //           (p, c) => ApiSettings.Caching.PersonUniqueIdToUsi.CacheSuppression))
+            //   .As<IPersonUniqueIdToUsiCache>()
+            //   .SingleInstance();
         }
     }
 }

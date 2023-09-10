@@ -44,22 +44,8 @@ namespace EdFi.Ods.Features.ExternalCache
 
                 if (!string.IsNullOrEmpty(cachedValue))
                 {
-                    if (key.StartsWith("IdentityValueMaps"))
-                    {
-                        var identityValueMaps = JsonConvert.DeserializeObject<PersonUniqueIdToUsiCache.IdentityValueMaps>(cachedValue); 
-                        
-                        if (identityValueMaps.UsiByUniqueId == null && identityValueMaps.UniqueIdByUsi == null)
-                        {
-                            // initialized but not set
-                            value = null;
-                        }
-                        else
-                        {
-                            value = identityValueMaps;
-                        }
 
-                    }
-                    else if (key.StartsWith("ApiClientDetails"))
+                    if (key.StartsWith("ApiClientDetails"))
                     {
                         value = JsonConvert.DeserializeObject<ApiClientDetails>(cachedValue);
                     }

@@ -336,6 +336,8 @@ namespace EdFi.Ods.Api.Startup
                 GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IDomainModelProvider>());
                 GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IAuthorizationContextProvider>());
                 GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IETagProvider>());
+                GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IContextProvider<UniqueIdLookupsByUsiContext>>());
+                GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IContextProvider<UsiLookupsByUniqueIdContext>>());
 
                 // netcore has removed the claims principal from the thread, to be on the controller.
                 // as a workaround for our current application we can resolve the IHttpContextAccessor.
@@ -344,10 +346,10 @@ namespace EdFi.Ods.Api.Startup
                     .HttpContext?.User;
 
                 // Provide cache using a closure rather than repeated invocations to the container
-                IPersonUniqueIdToUsiCache personUniqueIdToUsiCache = null;
+                // IPersonUniqueIdToUsiCache personUniqueIdToUsiCache = null;
 
-                PersonUniqueIdToUsiCache.GetCache = ()
-                    => personUniqueIdToUsiCache ??= Container.Resolve<IPersonUniqueIdToUsiCache>();
+                // PersonUniqueIdToUsiCache.GetCache = ()
+                //     => personUniqueIdToUsiCache ??= Container.Resolve<IPersonUniqueIdToUsiCache>();
 
                 // Provide cache using a closure rather than repeated invocations to the container
                 IDescriptorsCache cache = null;

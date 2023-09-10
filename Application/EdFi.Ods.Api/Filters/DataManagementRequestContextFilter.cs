@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using EdFi.Common.Configuration;
 using EdFi.Ods.Api.Constants;
 using EdFi.Ods.Common.Configuration;
+using EdFi.Ods.Common.Caching;
 using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Extensions;
 using EdFi.Ods.Common.Models;
@@ -26,7 +27,7 @@ namespace EdFi.Ods.Api.Filters
     /// </summary>
     public class DataManagementRequestContextFilter : IAsyncResourceFilter
     {
-        private readonly IContextProvider<DataManagementResourceContext> _contextProvider;
+        private readonly IContextProvider<DataManagementResourceContext> _resourceContextProvider;
         private readonly ApiSettings _apiSettings;
 
         private readonly ILog _logger = LogManager.GetLogger(typeof(DataManagementRequestContextFilter));
@@ -37,11 +38,15 @@ namespace EdFi.Ods.Api.Filters
     
         public DataManagementRequestContextFilter(
             IResourceModelProvider resourceModelProvider,
-            IContextProvider<DataManagementResourceContext> contextProvider,
-            ApiSettings apiSettings)
+            IContextProvider<DataManagementResourceContext> resourceContextProvider,
+            ApiSettings apiSettings,
+            IContextProvider<UsiLookupsByUniqueIdContext> usiLookupsByUniqueIdContextProvider,
+            IContextProvider<UniqueIdLookupsByUsiContext> uniqueIdLookupsByUsiContextProvider)
         {
             _resourceModelProvider = resourceModelProvider;
-            _contextProvider = contextProvider;
+            _resourceContextProvider = resourceContextProvider;
+            _usiLookupsByUniqueIdContextProvider = usiLookupsByUniqueIdContextProvider;
+            _uniqueIdLookupsByUsiContextProvider = uniqueIdLookupsByUsiContextProvider;
 
             _knownSchemaUriSegments = new Lazy<string[]>(
                 () => _resourceModelProvider.GetResourceModel()
@@ -110,7 +115,11 @@ namespace EdFi.Ods.Api.Filters
                         var resource = _resourceModelProvider.GetResourceModel()
                             .GetResourceByApiCollectionName(schema, resourceCollection);
 
-                        _contextProvider.Set(new DataManagementResourceContext(resource));
+                        _resourceContextProvider.Set(new DataManagementResourceContext(resource));
+
+                        // Initialize context for UniqueId/USI mappings
+                        _uniqueIdLookupsByUsiContextProvider.Set(new UniqueIdLookupsByUsiContext());
+                        _usiLookupsByUniqueIdContextProvider.Set(new UsiLookupsByUniqueIdContext());
                     }
                     catch (Exception)
                     {
