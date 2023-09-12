@@ -4,6 +4,7 @@
 // See the LICENSE and NOTICES files in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using EdFi.Common.Configuration;
@@ -13,8 +14,10 @@ using EdFi.Ods.Common.Caching;
 using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Extensions;
 using EdFi.Ods.Common.Models;
+using EdFi.Ods.Common.Models.Domain;
 using EdFi.Ods.Common.Models.Resource;
 using EdFi.Ods.Common.Security.Claims;
+using EdFi.Ods.Common.Specifications;
 using log4net;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
@@ -36,6 +39,8 @@ namespace EdFi.Ods.Api.Filters
         private readonly Lazy<string> _templatePrefix;
         private readonly Lazy<string[]> _knownSchemaUriSegments;
     
+    private readonly ConcurrentDictionary<FullName, bool> _containsUniqueIdsByFullName = new();
+
         public DataManagementRequestContextFilter(
             IResourceModelProvider resourceModelProvider,
             IContextProvider<DataManagementResourceContext> resourceContextProvider,
@@ -117,9 +122,20 @@ namespace EdFi.Ods.Api.Filters
 
                         _resourceContextProvider.Set(new DataManagementResourceContext(resource));
 
+                    // Determine if the resource contains any UniqueIds
+                    bool containsUniqueIds = _containsUniqueIdsByFullName.GetOrAdd(
+                        resource.FullName,
+                        static (fn, r) => r.AllContainedItemTypesOrSelf.Any(
+                            rc => rc.AllProperties.Any(rp => UniqueIdConventions.IsUniqueId(rp.PropertyName))),
+                        resource);
+
+                    // Only create contexts for UniqueId/USI resolution when needed
+                    if (containsUniqueIds)
+                    {
                         // Initialize context for UniqueId/USI mappings
                         _uniqueIdLookupsByUsiContextProvider.Set(new UniqueIdLookupsByUsiContext());
                         _usiLookupsByUniqueIdContextProvider.Set(new UsiLookupsByUniqueIdContext());
+                    }
                     }
                     catch (Exception)
                     {
