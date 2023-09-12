@@ -24,7 +24,7 @@ namespace EdFi.Ods.Common.Infrastructure.Repositories
             _getEntityById = getEntityById;
         }
 
-        public async Task DeleteByIdAsync(Guid id, string etag, CancellationToken cancellationToken)
+        public async Task<TEntity> DeleteByIdAsync(Guid id, string etag, CancellationToken cancellationToken)
         {
             using (new SessionScope(SessionFactory))
             {
@@ -33,6 +33,8 @@ namespace EdFi.Ods.Common.Infrastructure.Repositories
                 var persistedEntity = await _getEntityById.GetByIdAsync(id, cancellationToken);
 
                 await DeleteAsync(persistedEntity, etag, cancellationToken);
+
+                return persistedEntity;
             }
         }
     }
