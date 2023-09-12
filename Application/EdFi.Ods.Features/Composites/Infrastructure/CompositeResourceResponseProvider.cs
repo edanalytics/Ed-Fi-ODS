@@ -29,6 +29,7 @@ using log4net;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Context;
+using Standart.Hash.xxHash;
 
 namespace EdFi.Ods.Features.Composites.Infrastructure
 {
@@ -47,25 +48,32 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
               };
 
         private readonly ILog _logger = LogManager.GetLogger(typeof(CompositeResourceResponseProvider));
-        private readonly IPersonUniqueIdToUsiCache _personUniqueIdToUsiCache;
         private readonly IProfileResourceModelProvider _profileResourceModelProvider;
         private readonly IResourceModelProvider _resourceModelProvider;
         private readonly ISessionFactory _sessionFactory;
+
+        private readonly Lazy<Dictionary<string, string>> _uniqueIdSuffixByPersonType;
+        private readonly Lazy<Dictionary<string, string>> _uniqueIdPropertyNameByPersonType;
 
         public CompositeResourceResponseProvider(
             ISessionFactory sessionFactory,
             ICompositeDefinitionProcessor<HqlBuilderContext, CompositeQuery> compositeDefinitionProcessor,
             IResourceModelProvider resourceModelProvider,
-            IPersonUniqueIdToUsiCache personUniqueIdToUsiCache,
             IFieldsExpressionParser fieldsExpressionParser,
-            IProfileResourceModelProvider profileResourceModelProvider)
+            IProfileResourceModelProvider profileResourceModelProvider,
+            IPersonTypesProvider personTypesProvider)
         {
             _sessionFactory = sessionFactory;
             _compositeDefinitionProcessor = compositeDefinitionProcessor;
             _resourceModelProvider = resourceModelProvider;
-            _personUniqueIdToUsiCache = personUniqueIdToUsiCache;
             _fieldsExpressionParser = fieldsExpressionParser;
             _profileResourceModelProvider = profileResourceModelProvider;
+            
+            _uniqueIdSuffixByPersonType = new Lazy<Dictionary<string, string>>(
+                () => personTypesProvider.PersonTypes.ToDictionary(pt => pt, pt => $"{pt}UniqueId"));
+
+            _uniqueIdPropertyNameByPersonType = new Lazy<Dictionary<string, string>>(
+                () => personTypesProvider.PersonTypes.ToDictionary(pt => pt, pt => $"{pt}UniqueId".ToCamelCase()));
         }
 
         public object Get(
@@ -406,21 +414,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
                         }
                         else
                         {
-                            // See if we need to convert an USI to a UniqueId
-                            if (UniqueIdSpecification.IsUSI(key)
-                                && UniqueIdSpecification.TryGetUSIPersonTypeAndRoleName(key, out string personType, out string roleName))
-                            {
-                                // Translate to UniqueId
-                                string uniqueId = _personUniqueIdToUsiCache.GetUniqueId(personType, (int) sourceRow[key]);
-                                string uniqueIdKey = (roleName + personType + CompositeDefinitionHelper.UniqueId).ToCamelCase();
-
-                                renamedKey = uniqueIdKey;
-                                value = uniqueId;
-                            }
-                            else
-                            {
-                                value = sourceRow[key];
-                            }
+                            value = sourceRow[key];
                         }
                     }
 
