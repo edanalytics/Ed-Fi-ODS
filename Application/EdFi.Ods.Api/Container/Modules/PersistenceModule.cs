@@ -8,6 +8,7 @@ using Autofac;
 using Autofac.Core;
 using EdFi.Admin.DataAccess.Providers;
 using EdFi.Common.Database;
+using EdFi.Common.Extensions;
 using EdFi.Ods.Api.Caching;
 using EdFi.Ods.Api.IdentityValueMappers;
 using EdFi.Ods.Api.Providers;
@@ -126,22 +127,7 @@ namespace EdFi.Ods.Api.Container.Modules
                 .As(typeof(IUpsertEntity<>))
                 .SingleInstance();
 
-            builder.RegisterType<UniqueIdToUsiValueMapper>()
-                .As<IUniqueIdToUsiValueMapper>()
-                .PreserveExistingDefaults()
-                .SingleInstance();
-
             builder.RegisterType<InMemoryMapCache<(ulong odsInstanceHashId, string personType, PersonMapType personMapType), string, int>>()
-                // TODO: Rationalize the use of expiring concurrent dictionary with the legacy option for rolling expiration, implying a need for MemoryCache
-                // .WithParameter(
-                //     ctx =>
-                //     {
-                //         var apiSettings = ctx.Resolve<ApiSettings>();
-                //
-                //         return (ICacheProvider<(ulong odsInstanceHashId, string personType)>) new ExpiringConcurrentDictionaryCacheProvider<(ulong odsInstanceHashId, string personType)>(
-                //             "In-memory Person Map Cache",
-                //             TimeSpan.FromSeconds(apiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds));
-                //     })
                 .WithParameter(
                     new ResolvedParameter(
                         (p, c) => p.Name.Equals("slidingExpiration", StringComparison.InvariantCultureIgnoreCase),
@@ -166,48 +152,10 @@ namespace EdFi.Ods.Api.Container.Modules
 
                             return TimeSpan.FromSeconds(period);
                         }))
-                // TODO: This may no longer be the place to suppress caching for person uniqueId/USI caching
-                .WithParameter(
-                    new ResolvedParameter(
-                        (p, c) => p.Name.Equals("suppressStudentCache", StringComparison.InvariantCultureIgnoreCase),
-                        (p, c) =>
-                        {
-                            var configuration = c.Resolve<IConfiguration>();
-
-                            return configuration.GetValue<bool?>("ApiSettings:Caching:PersonUniqueIdToUsi:SuppressStudentCache") ?? false;
-                        }))
-                .WithParameter(
-                    new ResolvedParameter(
-                        (p, c) => p.Name.Equals("suppressStaffCache", StringComparison.InvariantCultureIgnoreCase),
-                        (p, c) =>
-                        {
-                            var configuration = c.Resolve<IConfiguration>();
-
-                            return configuration.GetValue<bool?>("ApiSettings:PersonUniqueIdToUsi:SuppressStaffCache") ?? false;
-                        }))
-                .WithParameter(
-                    new ResolvedParameter(
-                        (p, c) => p.Name.Equals("suppressParentCache", StringComparison.InvariantCultureIgnoreCase),
-                        (p, c) =>
-                        {
-                            var configuration = c.Resolve<IConfiguration>();
-
-                            return configuration.GetValue<bool?>("ApiSettings:Caching:PersonUniqueIdToUsi:SuppressParentCache") ?? false;
-                        }))
                 .As<IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), string, int>>()
                 .SingleInstance();
             
             builder.RegisterType<InMemoryMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), int, string>>()
-                // TODO: Rationalize the use of expiring concurrent dictionary with the legacy option for rolling expiration, implying a need for MemoryCache
-                .WithParameter(
-                    ctx =>
-                    {
-                        var apiSettings = ctx.Resolve<ApiSettings>();
-
-                        return (ICacheProvider<(ulong odsInstanceHashId, string personType)>) new ExpiringConcurrentDictionaryCacheProvider<(ulong odsInstanceHashId, string personType)>(
-                            "In-memory Person Map Cache",
-                            TimeSpan.FromSeconds(apiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds));
-                    })
                 .WithParameter(
                     new ResolvedParameter(
                         (p, c) => p.Name.Equals("slidingExpiration", StringComparison.InvariantCultureIgnoreCase),
@@ -230,15 +178,6 @@ namespace EdFi.Ods.Api.Container.Modules
 
                             return TimeSpan.FromSeconds(period);
                         }))
-                .WithParameter(
-                    new ResolvedParameter(
-                        (p, c) => p.Name.Equals("cacheSuppression", StringComparison.OrdinalIgnoreCase),
-                        (p, c) =>
-                        {
-                            var apiSettings = c.Resolve<ApiSettings>();
-                            
-                            return apiSettings.Caching.PersonUniqueIdToUsi.CacheSuppression;
-                        }))
                 .As<IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), int, string>>()
                 .SingleInstance();
 
@@ -247,10 +186,28 @@ namespace EdFi.Ods.Api.Container.Modules
                 .SingleInstance();
 
             builder.RegisterType<PersonUniqueIdResolver>()
+                .WithParameter(
+                    new ResolvedParameter(
+                        (p, c) => p.Name.EqualsIgnoreCase("cacheSuppressionByPersonType"),
+                        (p, c) =>
+                        {
+                            var apiSettings = c.Resolve<ApiSettings>();
+                            
+                            return apiSettings.Caching.PersonUniqueIdToUsi.CacheSuppression;
+                        }))
                 .As<IPersonUniqueIdResolver>()
                 .SingleInstance();
 
             builder.RegisterType<PersonUsiResolver>()
+                .WithParameter(
+                    new ResolvedParameter(
+                        (p, c) => p.Name.EqualsIgnoreCase("cacheSuppressionByPersonType"),
+                        (p, c) =>
+                        {
+                            var apiSettings = c.Resolve<ApiSettings>();
+                            
+                            return apiSettings.Caching.PersonUniqueIdToUsi.CacheSuppression;
+                        }))
                 .As<IPersonUsiResolver>()
                 .SingleInstance();
             
