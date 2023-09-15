@@ -31,11 +31,6 @@ namespace EdFi.Ods.Repositories.NHibernate.Tests
         {
             RegisterDependencies();
 
-            IPersonUniqueIdToUsiCache personUniqueIdToUsiCache = null;
-
-            // PersonUniqueIdToUsiCache.GetCache = ()
-            //         => personUniqueIdToUsiCache ??= Container.Resolve<IPersonUniqueIdToUsiCache>();
-
             Environment.ObjectsFactory = new NHibernateAutofacObjectsFactory(Container);
             SessionFactory = Container.Resolve<ISessionFactory>();
         }
@@ -61,7 +56,6 @@ namespace EdFi.Ods.Repositories.NHibernate.Tests
             builder.RegisterModule(new RepositoryFilterProvidersModule());
             builder.RegisterModule(new OdsConnectionStringProviderModule());
             builder.RegisterModule(new EdFiCommonModule());
-            builder.RegisterModule(new UsiModule());
             builder.RegisterModule(new CachingModule());
             builder.RegisterModule(new EdFiOdsInstanceIdentificationProviderModule());
             builder.RegisterModule(new PersonIdentifiersModule());
