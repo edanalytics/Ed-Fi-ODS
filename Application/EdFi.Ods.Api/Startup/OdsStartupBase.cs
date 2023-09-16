@@ -346,12 +346,6 @@ namespace EdFi.Ods.Api.Startup
                     .HttpContext?.User;
 
                 // Provide cache using a closure rather than repeated invocations to the container
-                // IPersonUniqueIdToUsiCache personUniqueIdToUsiCache = null;
-
-                // PersonUniqueIdToUsiCache.GetCache = ()
-                //     => personUniqueIdToUsiCache ??= Container.Resolve<IPersonUniqueIdToUsiCache>();
-
-                // Provide cache using a closure rather than repeated invocations to the container
                 IDescriptorsCache cache = null;
                 DescriptorsCache.GetCache = () => cache ??= Container.Resolve<IDescriptorsCache>();
 
