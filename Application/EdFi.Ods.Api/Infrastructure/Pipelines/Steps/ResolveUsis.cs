@@ -18,16 +18,13 @@ namespace EdFi.Ods.Api.Infrastructure.Pipelines.Steps;
 /// </summary>
 public class ResolveUsis<TContext, TResult, TResourceModel, TEntityModel> : IStep<TContext, TResult>
 {
-    private readonly IPersonEntitySpecification _personEntitySpecification;
     private readonly IContextProvider<UsiLookupsByUniqueIdContext> _lookupContextProvider;
     private readonly IPersonUsiResolver _personUsiResolver;
 
     public ResolveUsis(
-        IPersonEntitySpecification personEntitySpecification,
         IContextProvider<UsiLookupsByUniqueIdContext> lookupContextProvider,
         IPersonUsiResolver personUsiResolver)
     {
-        _personEntitySpecification = personEntitySpecification;
         _lookupContextProvider = lookupContextProvider;
         _personUsiResolver = personUsiResolver;
     }

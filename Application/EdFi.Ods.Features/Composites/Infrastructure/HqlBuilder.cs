@@ -17,6 +17,7 @@ using EdFi.Common.Utils.Extensions;
 using EdFi.Ods.Api.Caching;
 using EdFi.Ods.Api.Extensions;
 using EdFi.Ods.Common;
+using EdFi.Ods.Common.Caching;
 using EdFi.Ods.Common.Exceptions;
 using EdFi.Ods.Common.Extensions;
 using EdFi.Ods.Common.Infrastructure.Activities;
@@ -872,11 +873,11 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
             Dictionary<string, Dictionary<string, int>> ResolveUsisForUniqueIdQueryStringParameters()
             {
                 var usisToResolveByPersonType = parameterAndPropertyTuples
-                    .Where(t => UniqueIdConventions.IsUniqueId(t.targetProperty.PropertyName))
+                    .Where(t => UniqueIdSpecification.IsUniqueId(t.targetProperty.PropertyName))
                     .Select(
                         t =>
                         {
-                            if (!_personEntitySpecification.TryGetUniqueIdPersonType(t.targetProperty.PropertyName, out string personType))
+                            if (!UniqueIdSpecification.TryGetUniqueIdPersonType(t.targetProperty.PropertyName, out string personType))
                             {
                                 throw new NotSupportedException(
                                     $"Unable to determine person type from property '{t.targetProperty.PropertyName}'.");

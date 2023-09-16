@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using EdFi.Ods.Api.IdentityValueMappers;
 using EdFi.Ods.Common.Configuration;
 using EdFi.Ods.Common.Context;
+using EdFi.Ods.Common.Providers;
 
 namespace EdFi.Ods.Api.Caching;
 
@@ -22,10 +23,10 @@ public class PersonUniqueIdResolver : PersonIdentifierResolverBase<int, string>,
     public PersonUniqueIdResolver(
         IPersonMapCacheInitializer personMapCacheInitializer,
         IPersonIdentifiersProvider personIdentifiersProvider,
-        IContextProvider<OdsInstanceConfiguration> odsInstanceConfigurationContextProvider,
+        IEdFiOdsInstanceIdentificationProvider edFiOdsInstanceIdentificationProvider,
         IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), int, string> mapCache,
         Dictionary<string, bool> cacheSuppressionByPersonType)
-        : base(personMapCacheInitializer, odsInstanceConfigurationContextProvider, mapCache, cacheSuppressionByPersonType)
+        : base(personMapCacheInitializer, edFiOdsInstanceIdentificationProvider, mapCache, cacheSuppressionByPersonType)
     {
         _personIdentifiersProvider = personIdentifiersProvider;
     }

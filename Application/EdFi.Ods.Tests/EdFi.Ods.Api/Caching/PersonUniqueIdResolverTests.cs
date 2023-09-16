@@ -10,6 +10,7 @@ using EdFi.Ods.Common.Configuration;
 using EdFi.Ods.Common.Context;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EdFi.Ods.Common.Providers;
 using FakeItEasy;
 using NUnit.Framework;
 using Shouldly;
@@ -23,7 +24,7 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
         private IMapCache<(ulong, string, PersonMapType), int, string> _fakeMapCache;
         private Dictionary<string, bool> _fakeCacheSuppressionByPersonType;
         private IPersonMapCacheInitializer _fakePersonMapCacheInitializer;
-        private IContextProvider<OdsInstanceConfiguration> _fakeOdsInstanceConfigurationContextProvider;
+        private IEdFiOdsInstanceIdentificationProvider _fakeEdFiOdsInstanceIdentificationProvider;
 
         [SetUp]
         public void Arrange()
@@ -33,15 +34,8 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
             _fakeCacheSuppressionByPersonType = new Dictionary<string, bool>();
             _fakePersonMapCacheInitializer = A.Fake<IPersonMapCacheInitializer>();
 
-            var odsInstanceConfiguration = new OdsInstanceConfiguration(
-                1,
-                123456UL,
-                "conn",
-                new Dictionary<string, string>(),
-                new Dictionary<DerivativeType, string>());
-
-            _fakeOdsInstanceConfigurationContextProvider =
-                new TestContextProvider<OdsInstanceConfiguration>(odsInstanceConfiguration);
+            _fakeEdFiOdsInstanceIdentificationProvider = A.Fake<IEdFiOdsInstanceIdentificationProvider>();
+            A.CallTo(() => _fakeEdFiOdsInstanceIdentificationProvider.GetInstanceIdentification()).Returns(1223456UL);
         }
 
         [Test]
@@ -66,7 +60,7 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
             var resolver = new PersonUniqueIdResolver(
                 _fakePersonMapCacheInitializer,
                 _fakePersonIdentifiersProvider,
-                _fakeOdsInstanceConfigurationContextProvider,
+                _fakeEdFiOdsInstanceIdentificationProvider,
                 _fakeMapCache,
                 _fakeCacheSuppressionByPersonType);
 
@@ -115,7 +109,7 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
             var resolver = new PersonUniqueIdResolver(
                 _fakePersonMapCacheInitializer,
                 _fakePersonIdentifiersProvider,
-                _fakeOdsInstanceConfigurationContextProvider,
+                _fakeEdFiOdsInstanceIdentificationProvider,
                 _fakeMapCache,
                 _fakeCacheSuppressionByPersonType);
 
@@ -168,7 +162,7 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
             var resolver = new PersonUniqueIdResolver(
                 _fakePersonMapCacheInitializer,
                 _fakePersonIdentifiersProvider,
-                _fakeOdsInstanceConfigurationContextProvider,
+                _fakeEdFiOdsInstanceIdentificationProvider,
                 _fakeMapCache,
                 _fakeCacheSuppressionByPersonType);
 
@@ -217,7 +211,7 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
             var resolver = new PersonUniqueIdResolver(
                 _fakePersonMapCacheInitializer,
                 _fakePersonIdentifiersProvider,
-                _fakeOdsInstanceConfigurationContextProvider,
+                _fakeEdFiOdsInstanceIdentificationProvider,
                 _fakeMapCache,
                 _fakeCacheSuppressionByPersonType);
 
@@ -248,7 +242,7 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
             var resolver = new PersonUniqueIdResolver(
                 _fakePersonMapCacheInitializer,
                 _fakePersonIdentifiersProvider,
-                _fakeOdsInstanceConfigurationContextProvider,
+                _fakeEdFiOdsInstanceIdentificationProvider,
                 _fakeMapCache,
                 _fakeCacheSuppressionByPersonType);
 

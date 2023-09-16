@@ -646,13 +646,14 @@ namespace EdFi.Ods.CodeGen.Generators
                              }
                            : _notRendered
                    };
-        }
 
-            // Any min/max range definition implies domain meaning
-            if (property.PropertyType.MinValue.HasValue || property.PropertyType.MaxValue.HasValue)
-            {
-                return true;
-            }
+            // TODO: BAD MERGE. WHERE DOES THIS GO?
+            // // Any min/max range definition implies domain meaning
+            // if (property.PropertyType.MinValue.HasValue || property.PropertyType.MaxValue.HasValue)
+            // {
+            //     return true;
+            // }
+        }
 
         private static bool IsDelegatedToBaseProperty(Entity entity, EntityProperty p)
         {

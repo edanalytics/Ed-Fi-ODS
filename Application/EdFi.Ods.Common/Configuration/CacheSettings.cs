@@ -3,6 +3,8 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
+using System.Collections.Generic;
+
 namespace EdFi.Ods.Common.Configuration
 {
     public class CacheSettings
@@ -26,9 +28,11 @@ namespace EdFi.Ods.Common.Configuration
             public bool UseExternalCache { get; set; }
             public int AbsoluteExpirationSeconds { get; set; }
             public int SlidingExpirationSeconds { get; set; }
-            public bool SuppressStudentCache { get; set; }
-            public bool SuppressStaffCache { get; set; }
-            public bool SuppressParentCache { get; set; }
+            
+            public Dictionary<string, bool> CacheSuppression { get; set; }
+            // public bool SuppressStudentCache { get; set; }
+            // public bool SuppressStaffCache { get; set; }
+            // public bool SuppressParentCache { get; set; }
         }
 
         public class ApiClientDetailsConfiguration

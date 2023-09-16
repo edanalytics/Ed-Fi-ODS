@@ -25,13 +25,15 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
         private readonly ResourcePropertyRenderer _resourcePropertyRenderer = new();
         private IResourceProfileProvider _resourceProfileProvider;
         
-        public static IPersonEntitySpecification PersonEntitySpecification { get; private set; }
+        // public static IPersonEntitySpecification PersonEntitySpecification { get; private set; }
 
-        protected override void Configure() { }
+        protected override void Configure()
+        {
             _resourceProfileProvider = new ResourceProfileProvider(
                 new ResourceModelProvider(TemplateContext.DomainModelProvider),
                 TemplateContext);
-
+        }
+        
         protected override object Build()
         {
             var profileDatas = _resourceProfileProvider
@@ -39,11 +41,11 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
                 .ToList();
 
             var domainModel = TemplateContext.DomainModelProvider.GetDomainModel();
-            
-            PersonEntitySpecification = 
-                new PersonEntitySpecification(
-                    new PersonTypesProvider(
-                        new SuppliedDomainModelProvider(domainModel)));
+
+            // PersonEntitySpecification = null; // TODO
+                // new PersonEntitySpecification(
+                //     new PersonTypesProvider(
+                //         new SuppliedDomainModelProvider(domainModel)));
             
             var schemaNameMapProvider = TemplateContext.DomainModelProvider.GetDomainModel()
                 .SchemaNameMapProvider;
@@ -317,9 +319,9 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
                                         // Use GetLineage to build the property path, in reverse order, skipping the first since that's the BackReference itself
                                         PropertyPathToRoot = "BackReference." +
                                             string.Join(".", ((ResourceChildItem)resource).GetLineage().Reverse().Skip(1).Select(l => l.Name)),
-                                        IsUniqueId = UniqueIdConventions.IsUniqueId(p.PropertyName),
-                                        UniqueIdPersonType = UniqueIdConventions.IsUniqueId(p.PropertyName) 
-                                            ? PersonEntitySpecification.GetUniqueIdPersonType(p.PropertyName)
+                                        IsUniqueId = UniqueIdSpecification.IsUniqueId(p.PropertyName),
+                                        UniqueIdPersonType = UniqueIdSpecification.IsUniqueId(p.PropertyName) 
+                                            ? UniqueIdSpecification.GetUniqueIdPersonType(p.PropertyName)
                                             : null
                                     }),
                             ReferenceIdentifiers =

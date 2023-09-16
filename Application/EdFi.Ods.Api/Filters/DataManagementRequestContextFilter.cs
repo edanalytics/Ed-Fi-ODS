@@ -32,6 +32,8 @@ namespace EdFi.Ods.Api.Filters
     {
         private readonly IContextProvider<DataManagementResourceContext> _resourceContextProvider;
         private readonly ApiSettings _apiSettings;
+        private readonly IContextProvider<UsiLookupsByUniqueIdContext> _usiLookupsByUniqueIdContextProvider;
+        private readonly IContextProvider<UniqueIdLookupsByUsiContext> _uniqueIdLookupsByUsiContextProvider;
 
         private readonly ILog _logger = LogManager.GetLogger(typeof(DataManagementRequestContextFilter));
         private readonly IResourceModelProvider _resourceModelProvider;
@@ -60,6 +62,7 @@ namespace EdFi.Ods.Api.Filters
                     .ToArray());
 
             _apiSettings = apiSettings;
+            _usiLookupsByUniqueIdContextProvider = usiLookupsByUniqueIdContextProvider;
             _templatePrefix = new Lazy<string>(GetTemplatePrefix);
         }
 
@@ -126,7 +129,7 @@ namespace EdFi.Ods.Api.Filters
                     bool containsUniqueIds = _containsUniqueIdsByFullName.GetOrAdd(
                         resource.FullName,
                         static (fn, r) => r.AllContainedItemTypesOrSelf.Any(
-                            rc => rc.AllProperties.Any(rp => UniqueIdConventions.IsUniqueId(rp.PropertyName))),
+                            rc => rc.AllProperties.Any(rp => UniqueIdSpecification.IsUniqueId(rp.PropertyName))),
                         resource);
 
                     // Only create contexts for UniqueId/USI resolution when needed

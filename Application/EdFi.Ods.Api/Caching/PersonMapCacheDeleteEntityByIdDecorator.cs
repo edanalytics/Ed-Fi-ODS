@@ -13,6 +13,7 @@ using EdFi.Ods.Common;
 using EdFi.Ods.Common.Configuration;
 using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Models.Domain;
+using EdFi.Ods.Common.Providers;
 using EdFi.Ods.Common.Repositories;
 
 namespace EdFi.Ods.Api.Caching;
@@ -28,7 +29,7 @@ public class PersonMapCacheDeleteEntityByIdDecorator<TEntity> : IDeleteEntityByI
     private readonly IDeleteEntityById<TEntity> _next;
     private readonly IMapCache<(ulong, string, PersonMapType), string, int> _usiByUniqueIdByPersonType;
     private readonly IMapCache<(ulong, string, PersonMapType), int, string> _uniqueIdByUsiByPersonType;
-    private readonly IContextProvider<OdsInstanceConfiguration> _odsInstanceConfigurationProvider;
+    private readonly IEdFiOdsInstanceIdentificationProvider _edFiOdsInstanceIdentificationProvider;
     
     private readonly Lazy<Func<TEntity, int>> _usiPropertyAccessor;
     private readonly string _personType;
@@ -39,17 +40,17 @@ public class PersonMapCacheDeleteEntityByIdDecorator<TEntity> : IDeleteEntityByI
     /// <param name="next">The decorated instance for which authorization is being performed.</param>
     /// <param name="usiByUniqueIdByPersonType"></param>
     /// <param name="uniqueIdByUsiByPersonType"></param>
-    /// <param name="odsInstanceConfigurationProvider"></param>
+    /// <param name="edFiOdsInstanceIdentificationProvider"></param>
     public PersonMapCacheDeleteEntityByIdDecorator(
         IDeleteEntityById<TEntity> next,
         IMapCache<(ulong, string, PersonMapType), string, int> usiByUniqueIdByPersonType,
         IMapCache<(ulong, string, PersonMapType), int, string> uniqueIdByUsiByPersonType,
-        IContextProvider<OdsInstanceConfiguration> odsInstanceConfigurationProvider)
+        IEdFiOdsInstanceIdentificationProvider edFiOdsInstanceIdentificationProvider)
     {
         _next = next;
         _usiByUniqueIdByPersonType = usiByUniqueIdByPersonType;
         _uniqueIdByUsiByPersonType = uniqueIdByUsiByPersonType;
-        _odsInstanceConfigurationProvider = odsInstanceConfigurationProvider;
+        _edFiOdsInstanceIdentificationProvider = edFiOdsInstanceIdentificationProvider;
 
         // Perform a defensive check (registration logic should already not apply the decorator to non-person types)
         if (typeof(TEntity).IsImplementationOf<IIdentifiablePerson>())
@@ -88,7 +89,7 @@ public class PersonMapCacheDeleteEntityByIdDecorator<TEntity> : IDeleteEntityByI
         // If we're still here (no errors), remove the associated cached map entry
         if (_personType != null && deletedEntity is IIdentifiablePerson person)
         {
-            ulong odsInstanceHashId = _odsInstanceConfigurationProvider.Get().OdsInstanceHashId;
+            ulong odsInstanceHashId = _edFiOdsInstanceIdentificationProvider.GetInstanceIdentification();
 
             int usi = _usiPropertyAccessor.Value.Invoke(deletedEntity);
 

@@ -5,6 +5,7 @@
 
 using System;
 using EdFi.Ods.Common.Caching;
+using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Models;
 using EdFi.Ods.Common.Security.Claims;
 
@@ -54,7 +55,6 @@ namespace EdFi.Ods.Common.Dependencies
             {
                 _etagProvider = new Lazy<IETagProvider>(resolver);
             }
-            }
 
             public static void Set(Func<IContextProvider<UniqueIdLookupsByUsiContext>> resolver)
             {
@@ -64,6 +64,7 @@ namespace EdFi.Ods.Common.Dependencies
             public static void Set(Func<IContextProvider<UsiLookupsByUniqueIdContext>> resolver)
             {
                 _usiLookupsContextProvider = new Lazy<IContextProvider<UsiLookupsByUniqueIdContext>>(resolver);
+            }
         }
     }
 }

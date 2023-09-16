@@ -7,7 +7,7 @@ using Autofac;
 using EdFi.Ods.Common.Configuration;
 using EdFi.Ods.Features.ExternalCache;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Redis;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 namespace EdFi.Ods.Features.Redis
 {

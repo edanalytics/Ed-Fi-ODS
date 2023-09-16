@@ -6,10 +6,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EdFi.Common.Utils.Extensions;
 using EdFi.Ods.Api.IdentityValueMappers;
-using EdFi.Ods.Common.Configuration;
-using EdFi.Ods.Common.Context;
+using EdFi.Ods.Common.Extensions;
+using EdFi.Ods.Common.Providers;
 
 namespace EdFi.Ods.Api.Caching;
 
@@ -25,17 +24,16 @@ public abstract class PersonIdentifierResolverBase<TLookup, TResolved>
     private readonly Dictionary<string, bool> _cacheSuppressionByPersonType;
 
     private readonly IPersonMapCacheInitializer _personMapCacheInitializer;
-    
-    private readonly IContextProvider<OdsInstanceConfiguration> _odsInstanceConfigurationContextProvider;
+    private readonly IEdFiOdsInstanceIdentificationProvider _edFiOdsInstanceIdentificationProvider;
 
     protected PersonIdentifierResolverBase(
         IPersonMapCacheInitializer personMapCacheInitializer,
-        IContextProvider<OdsInstanceConfiguration> odsInstanceConfigurationContextProvider,
+        IEdFiOdsInstanceIdentificationProvider edFiOdsInstanceIdentificationProvider,
         IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), TLookup, TResolved> mapCache,
         Dictionary<string, bool> cacheSuppressionByPersonType)
     {
         _personMapCacheInitializer = personMapCacheInitializer;
-        _odsInstanceConfigurationContextProvider = odsInstanceConfigurationContextProvider;
+        _edFiOdsInstanceIdentificationProvider = edFiOdsInstanceIdentificationProvider;
         _mapCache = mapCache;
         _cacheSuppressionByPersonType = cacheSuppressionByPersonType;
     }
@@ -68,7 +66,7 @@ public abstract class PersonIdentifierResolverBase<TLookup, TResolved>
 
         async Task<ICollection<TLookup>> ResolveIdentifiersFromCache()
         {
-            ulong odsInstanceHashId = _odsInstanceConfigurationContextProvider.Get().OdsInstanceHashId;
+            ulong odsInstanceHashId = _edFiOdsInstanceIdentificationProvider.GetInstanceIdentification();
 
             // Ensure cache initialization of the entire UniqueId/USI map for the ODS
             var initializationTask = _personMapCacheInitializer.EnsurePersonMapsInitialized(odsInstanceHashId, personType);

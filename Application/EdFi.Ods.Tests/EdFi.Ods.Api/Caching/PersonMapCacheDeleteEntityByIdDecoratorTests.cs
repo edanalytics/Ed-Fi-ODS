@@ -13,6 +13,7 @@ using EdFi.Ods.Common;
 using EdFi.Ods.Common.Configuration;
 using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Models.Domain;
+using EdFi.Ods.Common.Providers;
 using EdFi.Ods.Common.Repositories;
 using FakeItEasy;
 using NUnit.Framework;
@@ -26,7 +27,7 @@ public class PersonMapCacheDeleteEntityByIdDecoratorTests
     private IDeleteEntityById<FakePerson> _next;
     private IMapCache<(ulong, string, PersonMapType), string, int> _usiByUniqueIdByPersonType;
     private IMapCache<(ulong, string, PersonMapType), int, string> _uniqueIdByUsiByPersonType;
-    private IContextProvider<OdsInstanceConfiguration> _odsInstanceConfigurationProvider;
+    private IEdFiOdsInstanceIdentificationProvider _edFiOdsInstanceIdentificationProvider;
 
     [SetUp]
     public void SetUp()
@@ -35,14 +36,14 @@ public class PersonMapCacheDeleteEntityByIdDecoratorTests
         _next = A.Fake<IDeleteEntityById<FakePerson>>();
         _usiByUniqueIdByPersonType = A.Fake<IMapCache<(ulong, string, PersonMapType), string, int>>();
         _uniqueIdByUsiByPersonType = A.Fake<IMapCache<(ulong, string, PersonMapType), int, string>>();
-        _odsInstanceConfigurationProvider = A.Fake<IContextProvider<OdsInstanceConfiguration>>();
+        _edFiOdsInstanceIdentificationProvider = A.Fake<IEdFiOdsInstanceIdentificationProvider>();
         
         // Create the decorator instance to be tested
         _decorator = new PersonMapCacheDeleteEntityByIdDecorator<FakePerson>(
             _next,
             _usiByUniqueIdByPersonType,
             _uniqueIdByUsiByPersonType,
-            _odsInstanceConfigurationProvider);
+            _edFiOdsInstanceIdentificationProvider);
     }
 
     [Test]
@@ -97,7 +98,7 @@ public class PersonMapCacheDeleteEntityByIdDecoratorTests
             next,
             _usiByUniqueIdByPersonType,
             _uniqueIdByUsiByPersonType,
-            _odsInstanceConfigurationProvider);
+            _edFiOdsInstanceIdentificationProvider);
         
         // Configure the expected behavior of your dependencies
         A.CallTo(() => next.DeleteByIdAsync(entity.Id, A<string>._, A<CancellationToken>._))

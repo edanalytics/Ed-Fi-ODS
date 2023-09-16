@@ -140,11 +140,11 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
                 IsFirstProperty = IsFirstProperty,
                 IsLastProperty = IsLastProperty,
                 IsUnique = IsUnique,
-                IsUniqueId = UniqueIdConventions.IsUniqueId(propertyName),
-                UniqueIdPersonType = UniqueIdConventions.IsUniqueId(propertyName) 
-                    ? Resources.PersonEntitySpecification.GetUniqueIdPersonType(propertyName)
+                IsUniqueId = UniqueIdSpecification.IsUniqueId(propertyName),
+                UniqueIdPersonType = UniqueIdSpecification.IsUniqueId(propertyName) 
+                    ? UniqueIdSpecification.GetUniqueIdPersonType(propertyName)
                     : null,
-                RangeAttribute = Property.ToRangeAttributeCSharp(),
+                RangeAttribute = Property.EntityProperty.ToRangeAttributeCSharp(),
                 IsDateOnlyProperty = Property.PropertyType.DbType == DbType.Date,
                 IsTimeSpanProperty = Property.PropertyType.DbType == DbType.Time,
                 ClassName = this[ResourceRenderer.ClassName]

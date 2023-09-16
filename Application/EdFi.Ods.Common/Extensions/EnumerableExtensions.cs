@@ -10,11 +10,23 @@ namespace EdFi.Ods.Common.Extensions
 {
     public static class EnumerableExtensions
     {
-        public static IEnumerable<T> Each<T>(this IEnumerable<T> source, Action<T> action)
+        public static IEnumerable<T> ForEach<T, TArg>(this IEnumerable<T> source, Action<T, TArg> action, TArg arg)
         {
             foreach (var item in source)
             {
-                action(item);
+                action(item, arg);
+            }
+
+            return source;
+        }
+
+        public static IEnumerable<T> ForEach<T, TArg>(this IEnumerable<T> source, Action<T, int, TArg> action, TArg arg)
+        {
+            int i = 0;
+            
+            foreach (var item in source)
+            {
+                action(item, i++, arg);
             }
 
             return source;
