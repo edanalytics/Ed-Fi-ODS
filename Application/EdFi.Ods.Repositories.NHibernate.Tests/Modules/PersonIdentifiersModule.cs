@@ -15,7 +15,8 @@ namespace EdFi.Ods.Repositories.NHibernate.Tests.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<PersonIdentifiersProvider>().As<IPersonIdentifiersProvider>();
+            builder.RegisterType<PersonIdentifiersProvider>()
+                .As<IPersonIdentifiersProvider>()
                 .SingleInstance();
 
             RegisterPersonIdentifierCaching(builder);
@@ -54,7 +55,7 @@ namespace EdFi.Ods.Repositories.NHibernate.Tests.Modules
 
             builder.RegisterType<PersonUsiResolver>()
                 .WithParameter(new NamedParameter("cacheSuppressionByPersonType", cacheSuppression))
-                .As<IPersonUsiResolver>()
+                .As<IPersonUsiResolver>();
         }
     }
 }
