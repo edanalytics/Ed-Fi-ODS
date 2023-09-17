@@ -141,11 +141,17 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Api.Caching
                 .MustHaveHappenedOnceExactly();
             
             A.CallTo(() => _fakeMapCache.SetMapEntriesAsync(
-                    uniqueIdByUsiTuple, A<(int, string)[]>.That.Matches(x => x.Length == 2)))
+                    uniqueIdByUsiTuple, A<(int key, string value)[]>.That.Matches(x => 
+                        x.Length == 2 
+                        && x[0].key == 1 && x[0].value == "UniqueId1"
+                        && x[1].key == 2 && x[1].value == "UniqueId2")))
                 .MustHaveHappenedOnceExactly();
             
             A.CallTo(() => _fakeReverseMapCache.SetMapEntriesAsync(
-                    usiByUniqueIdTuple, A<(string, int)[]>.That.Matches(x => x.Length == 2)))
+                    usiByUniqueIdTuple, A<(string key, int value)[]>.That.Matches(x => 
+                        x.Length == 2 
+                        && x[0].key == "UniqueId1" && x[0].value == 1 
+                        && x[1].key == "UniqueId2" && x[1].value == 2)))
                 .MustHaveHappenedOnceExactly();
         }
 
