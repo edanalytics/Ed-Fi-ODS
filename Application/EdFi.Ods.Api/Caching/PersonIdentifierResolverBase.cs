@@ -21,6 +21,7 @@ namespace EdFi.Ods.Api.Caching;
 public abstract class PersonIdentifierResolverBase<TLookup, TResolved>
 {
     private readonly IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), TLookup, TResolved> _mapCache;
+    private readonly IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), TResolved, TLookup> _reverseMapCache;
     private readonly Dictionary<string, bool> _cacheSuppressionByPersonType;
 
     private readonly IPersonMapCacheInitializer _personMapCacheInitializer;
@@ -30,11 +31,13 @@ public abstract class PersonIdentifierResolverBase<TLookup, TResolved>
         IPersonMapCacheInitializer personMapCacheInitializer,
         IEdFiOdsInstanceIdentificationProvider edFiOdsInstanceIdentificationProvider,
         IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), TLookup, TResolved> mapCache,
+        IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), TResolved, TLookup> reverseMapCache,
         Dictionary<string, bool> cacheSuppressionByPersonType)
     {
         _personMapCacheInitializer = personMapCacheInitializer;
         _edFiOdsInstanceIdentificationProvider = edFiOdsInstanceIdentificationProvider;
         _mapCache = mapCache;
+        _reverseMapCache = reverseMapCache;
         _cacheSuppressionByPersonType = cacheSuppressionByPersonType;
     }
 
@@ -53,13 +56,26 @@ public abstract class PersonIdentifierResolverBase<TLookup, TResolved>
         // If there are any values that still need to be loaded directly from the ODS...
         if (identifiersToLoad != null)
         {
-            var results = await LoadUnresolvedPersonIdentifiersAsync(personType, identifiersToLoad);
+            var loadedIdentifierMappings = (await LoadUnresolvedPersonIdentifiersAsync(personType, identifiersToLoad))
+                .Select(ExtractKeyValueTuple)
+                .ToArray();
 
-            foreach (var result in results)
+            // Update the contextual dictionary for the current request
+            foreach (var loadedIdentifierMapping in loadedIdentifierMappings)
             {
-                SetResolvedIdentifier(lookups, result);
+                lookups[loadedIdentifierMapping.key] = loadedIdentifierMapping.value;
             }
             
+            // Update the underlying caches with the key/value pairs it doesn't have
+            ulong odsInstanceHashId = _edFiOdsInstanceIdentificationProvider.GetInstanceIdentification();
+
+            await Task.WhenAll(
+                _mapCache.SetMapEntriesAsync((odsInstanceHashId, personType, MapType), loadedIdentifierMappings),
+                
+                _reverseMapCache.SetMapEntriesAsync(
+                    (odsInstanceHashId, personType, MapType.Inverse()),
+                    loadedIdentifierMappings.Select(x => (x.value, x.key)).ToArray()));
+
             // Note: We may want to validate that all values have been resolved, though the behavior of the API when the
             // resolution fails (primarily for UniqueId values passed in PUT/POST requests) is appropriate without this extra validation. 
         }
@@ -113,12 +129,10 @@ public abstract class PersonIdentifierResolverBase<TLookup, TResolved>
         => _cacheSuppressionByPersonType.TryGetValue(personType, out bool isSuppressed) && isSuppressed;
 
     /// <summary>
-    /// Sets the entry in the supplied <param name="lookups" /> dictionary from the <see cref="PersonIdentifiersValueMap" />
-    /// appropriately for the current implementations <see cref="MapType" />.  
+    /// Gets the key/value tuple from the <see cref="PersonIdentifiersValueMap" /> appropriately for the <see cref="MapType" />.  
     /// </summary>
-    /// <param name="lookups">The dictionary containing the values to be resolved for the current request.</param>
-    /// <param name="personIdentifiers">The UniqueId/USI values for a person in the ODS.</param>
-    protected abstract void SetResolvedIdentifier(IDictionary<TLookup, TResolved> lookups, PersonIdentifiersValueMap personIdentifiers);
+    /// <param name="personIdentifiers">The UniqueId/USI values for a person in the ODS to be converted to a key/value tuple.</param>
+    protected abstract (TLookup key, TResolved value) ExtractKeyValueTuple(PersonIdentifiersValueMap personIdentifiers);
 
     protected abstract Task<IEnumerable<PersonIdentifiersValueMap>> LoadUnresolvedPersonIdentifiersAsync(
         string personType,
