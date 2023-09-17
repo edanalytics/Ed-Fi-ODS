@@ -57,19 +57,19 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Features.UniqueIdIntegration
                 }
             };
 
-            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiers("Student"))
+            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiersAsync("Student"))
                 .Returns(Task.FromResult((IEnumerable<PersonIdentifiersValueMap>) _suppliedPersonIdentifiers));
 
-            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiers("Staff"))
+            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiersAsync("Staff"))
                 .Returns(Task.FromResult((IEnumerable<PersonIdentifiersValueMap>) _suppliedPersonIdentifiers));
 
-            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiers("Parent"))
+            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiersAsync("Parent"))
                 .Returns(Task.FromResult((IEnumerable<PersonIdentifiersValueMap>) _suppliedPersonIdentifiers));
 
             string validPersonTypes = string.Join("','", PersonEntitySpecification.ValidPersonTypes)
                 .SingleQuoted();
 
-            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiers("NonPersonType"))
+            A.CallTo(() => _personIdentifiersProvider.GetAllPersonIdentifiersAsync("NonPersonType"))
                 .ThrowsAsync(
                     new AggregateException(
                         new ArgumentException(
@@ -80,17 +80,17 @@ namespace EdFi.Ods.Tests.EdFi.Ods.Features.UniqueIdIntegration
 
         protected override async Task ActAsync()
         {
-            _actualStudentIdentifiers = await _personIdentifiersProvider.GetAllPersonIdentifiers("Student")
+            _actualStudentIdentifiers = await _personIdentifiersProvider.GetAllPersonIdentifiersAsync("Student")
                 .ConfigureAwait(false);
 
-            _actualStaffIdentifiers = await _personIdentifiersProvider.GetAllPersonIdentifiers("Staff")
+            _actualStaffIdentifiers = await _personIdentifiersProvider.GetAllPersonIdentifiersAsync("Staff")
                 .ConfigureAwait(false);
 
-            _actualParentIdentifiers = await _personIdentifiersProvider.GetAllPersonIdentifiers("Parent")
+            _actualParentIdentifiers = await _personIdentifiersProvider.GetAllPersonIdentifiersAsync("Parent")
                 .ConfigureAwait(false);
 
             // This statement throws an exception
-            var ignoredDueToException = await _personIdentifiersProvider.GetAllPersonIdentifiers("NonPersonType")
+            var ignoredDueToException = await _personIdentifiersProvider.GetAllPersonIdentifiersAsync("NonPersonType")
                 .ConfigureAwait(false);
         }
 
