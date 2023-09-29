@@ -228,6 +228,7 @@ namespace EdFi.Ods.CodeGen.Generators
                     {
                         Name = x.GetModelsInterfacePropertyName(),
                         IsString = x.PropertyType.IsString(),
+                        IsDescriptorUsage = x.IsDescriptorUsage,
                     })
                 .OrderBy(x => x.Name)
                 .ToList();
@@ -242,6 +243,7 @@ namespace EdFi.Ods.CodeGen.Generators
                      {
                          PrimaryKeyName = x.Name,
                          IsString = x.IsString,
+                         IsDescriptorUsage = x.IsDescriptorUsage,
                          IsFirst = i == 0,
                          IsLast = i == contextualIdList.Count - 1,
                      });
