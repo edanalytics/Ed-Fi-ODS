@@ -1,9 +1,11 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 // Licensed to the Ed-Fi Alliance under one or more agreements.
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
 using System;
+using EdFi.Ods.Common.Caching;
+using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Models;
 using EdFi.Ods.Common.Security.Claims;
 
@@ -18,11 +20,15 @@ namespace EdFi.Ods.Common.Dependencies
         private static Lazy<IResourceModelProvider> _resourceModelProvider;
         private static Lazy<IDomainModelProvider> _domainModelProvider;
         private static Lazy<IETagProvider> _etagProvider;
+        private static Lazy<IContextProvider<UniqueIdLookupsByUsiContext>> _uniqueIdLookupsContextProvider;
+        private static Lazy<IContextProvider<UsiLookupsByUniqueIdContext>> _usiLookupsContextProvider;
 
         public static IAuthorizationContextProvider AuthorizationContextProvider => _authorizationContextProvider?.Value;
         public static IResourceModelProvider ResourceModelProvider => _resourceModelProvider?.Value;
         public static IDomainModelProvider DomainModelProvider => _domainModelProvider?.Value;
         public static IETagProvider ETagProvider => _etagProvider?.Value;
+        public static IContextProvider<UniqueIdLookupsByUsiContext> UniqueIdLookupsByUsiContextProvider => _uniqueIdLookupsContextProvider?.Value;
+        public static IContextProvider<UsiLookupsByUniqueIdContext> UsiLookupsByUniqueIdContextProvider => _usiLookupsContextProvider?.Value;
 
         /// <summary>
         /// Provides a mechanism for providing resolution of container managed components (intended for use only
@@ -48,6 +54,16 @@ namespace EdFi.Ods.Common.Dependencies
             public static void Set(Func<IETagProvider> resolver)
             {
                 _etagProvider = new Lazy<IETagProvider>(resolver);
+            }
+
+            public static void Set(Func<IContextProvider<UniqueIdLookupsByUsiContext>> resolver)
+            {
+                _uniqueIdLookupsContextProvider = new Lazy<IContextProvider<UniqueIdLookupsByUsiContext>>(resolver);
+            }
+
+            public static void Set(Func<IContextProvider<UsiLookupsByUniqueIdContext>> resolver)
+            {
+                _usiLookupsContextProvider = new Lazy<IContextProvider<UsiLookupsByUniqueIdContext>>(resolver);
             }
         }
     }

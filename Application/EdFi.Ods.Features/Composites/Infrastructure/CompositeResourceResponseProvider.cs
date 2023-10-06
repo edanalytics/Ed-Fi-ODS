@@ -14,7 +14,6 @@ using System.Xml.Linq;
 using EdFi.Common.Extensions;
 using EdFi.Ods.Api.Extensions;
 using EdFi.Ods.Common;
-using EdFi.Ods.Common.Caching;
 using EdFi.Ods.Common.Conventions;
 using EdFi.Ods.Common.Exceptions;
 using EdFi.Ods.Common.Extensions;
@@ -47,7 +46,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
               };
 
         private readonly ILog _logger = LogManager.GetLogger(typeof(CompositeResourceResponseProvider));
-        private readonly IPersonUniqueIdToUsiCache _personUniqueIdToUsiCache;
+
         private readonly IProfileResourceModelProvider _profileResourceModelProvider;
         private readonly IResourceModelProvider _resourceModelProvider;
         private readonly ISessionFactory _sessionFactory;
@@ -56,14 +55,12 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
             ISessionFactory sessionFactory,
             ICompositeDefinitionProcessor<HqlBuilderContext, CompositeQuery> compositeDefinitionProcessor,
             IResourceModelProvider resourceModelProvider,
-            IPersonUniqueIdToUsiCache personUniqueIdToUsiCache,
             IFieldsExpressionParser fieldsExpressionParser,
             IProfileResourceModelProvider profileResourceModelProvider)
         {
             _sessionFactory = sessionFactory;
             _compositeDefinitionProcessor = compositeDefinitionProcessor;
             _resourceModelProvider = resourceModelProvider;
-            _personUniqueIdToUsiCache = personUniqueIdToUsiCache;
             _fieldsExpressionParser = fieldsExpressionParser;
             _profileResourceModelProvider = profileResourceModelProvider;
         }
@@ -406,21 +403,7 @@ namespace EdFi.Ods.Features.Composites.Infrastructure
                         }
                         else
                         {
-                            // See if we need to convert an USI to a UniqueId
-                            if (UniqueIdSpecification.IsUSI(key)
-                                && UniqueIdSpecification.TryGetUSIPersonTypeAndRoleName(key, out string personType, out string roleName))
-                            {
-                                // Translate to UniqueId
-                                string uniqueId = _personUniqueIdToUsiCache.GetUniqueId(personType, (int) sourceRow[key]);
-                                string uniqueIdKey = (roleName + personType + CompositeDefinitionHelper.UniqueId).ToCamelCase();
-
-                                renamedKey = uniqueIdKey;
-                                value = uniqueId;
-                            }
-                            else
-                            {
-                                value = sourceRow[key];
-                            }
+                            value = sourceRow[key];
                         }
                     }
 

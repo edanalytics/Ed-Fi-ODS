@@ -56,6 +56,7 @@ using System.Runtime.Loader;
 using System.Security.Claims;
 using EdFi.Admin.DataAccess.DbConfigurations;
 using EdFi.Ods.Common;
+using EdFi.Ods.Common.Context;
 
 namespace EdFi.Ods.Api.Startup
 {
@@ -336,18 +337,14 @@ namespace EdFi.Ods.Api.Startup
                 GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IDomainModelProvider>());
                 GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IAuthorizationContextProvider>());
                 GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IETagProvider>());
+                GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IContextProvider<UniqueIdLookupsByUsiContext>>());
+                GeneratedArtifactStaticDependencies.Resolvers.Set(() => Container.Resolve<IContextProvider<UsiLookupsByUniqueIdContext>>());
 
                 // netcore has removed the claims principal from the thread, to be on the controller.
                 // as a workaround for our current application we can resolve the IHttpContextAccessor.
                 // c.f. https://docs.microsoft.com/en-us/aspnet/core/migration/claimsprincipal-current?view=aspnetcore-3.1
                 ClaimsPrincipal.ClaimsPrincipalSelector = () => Container.Resolve<IHttpContextAccessor>()
                     .HttpContext?.User;
-
-                // Provide cache using a closure rather than repeated invocations to the container
-                IPersonUniqueIdToUsiCache personUniqueIdToUsiCache = null;
-
-                PersonUniqueIdToUsiCache.GetCache = ()
-                    => personUniqueIdToUsiCache ??= Container.Resolve<IPersonUniqueIdToUsiCache>();
 
                 // Provide cache using a closure rather than repeated invocations to the container
                 IDescriptorsCache cache = null;

@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 // Licensed to the Ed-Fi Alliance under one or more agreements.
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
@@ -10,6 +10,7 @@ using EdFi.Ods.Api.Caching;
 using EdFi.Ods.Common.Caching;
 using EdFi.Ods.Common.Configuration;
 using EdFi.Ods.Common.Container;
+using EdFi.Ods.Features.ExternalCache.Redis;
 using Microsoft.Extensions.Caching.Distributed;
 using System;
 using EdFi.Common.Security;
@@ -43,7 +44,7 @@ namespace EdFi.Ods.Features.ExternalCache
 
             if (ApiSettings.Caching.PersonUniqueIdToUsi.UseExternalCache)
             {
-                OverridePersonUniqueIdtoUsiCache(builder);
+                OverridePersonUniqueIdToUsiCache(builder);
             }
         }
 
@@ -103,64 +104,72 @@ namespace EdFi.Ods.Features.ExternalCache
                 .SingleInstance();
         }
 
-        public void OverridePersonUniqueIdtoUsiCache(ContainerBuilder builder)
+        public void OverridePersonUniqueIdToUsiCache(ContainerBuilder builder)
         {
-            builder.RegisterType<PersonUniqueIdToUsiCache>()
-            .WithParameter(new NamedParameter("synchronousInitialization", false))
-            .WithParameter(
-                new ResolvedParameter(
-                  (p, c) => p.Name.Equals("cacheProvider", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      int period = ApiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
-                      int expirationPeriod = ApiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+            if (IsProviderSelected("Redis"))
+            {
+                builder.RegisterType<RedisUsiByUniqueIdMapCache>()
+                    .WithParameter(
+                        new ResolvedParameter(
+                            (p, c) => p.Name == "configuration",
+                            (p, c) =>
+                            {
+                                var apiSettings = c.Resolve<ApiSettings>();
 
-                      return new ExternalCacheProvider(
-                              c.Resolve<IDistributedCache>(),
-                              TimeSpan.FromSeconds(period),
-                              TimeSpan.FromSeconds(expirationPeriod));
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("slidingExpiration", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      int period = ApiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
+                                return apiSettings.Caching.Redis.Configuration;
+                            }))
+                    .WithParameter(
+                        new ResolvedParameter(
+                            (p, c) => p.Name.Equals("slidingExpirationPeriod", StringComparison.OrdinalIgnoreCase),
+                            (p, c) =>
+                            {
+                                var apiSettings = c.Resolve<ApiSettings>();
+                                int seconds = apiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
+                                return seconds > 0 ? TimeSpan.FromSeconds(seconds) : null;
+                            }))
+                    .WithParameter(
+                        new ResolvedParameter(
+                            (p, c) => p.Name.Equals("absoluteExpirationPeriod", StringComparison.OrdinalIgnoreCase),
+                            (p, c) =>
+                            {
+                                var apiSettings = c.Resolve<ApiSettings>();
+                                int seconds = apiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+                                return seconds > 0 ? TimeSpan.FromSeconds(seconds) : null;
+                            }))
+                    .As<IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), string, int>>()
+                    .SingleInstance();
 
-                      return TimeSpan.FromSeconds(period);
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("absoluteExpirationPeriod", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      int period = ApiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+                builder.RegisterType<RedisUniqueIdByUsiMapCache>()
+                    .WithParameter(
+                        new ResolvedParameter(
+                            (p, c) => p.Name == "configuration",
+                            (p, c) =>
+                            {
+                                var apiSettings = c.Resolve<ApiSettings>();
 
-                      return TimeSpan.FromSeconds(period);
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("suppressStudentCache", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      return ApiSettings.Caching.PersonUniqueIdToUsi.SuppressStudentCache;
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("suppressStaffCache", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      return ApiSettings.Caching.PersonUniqueIdToUsi.SuppressStaffCache;
-                  }))
-          .WithParameter(
-              new ResolvedParameter(
-                  (p, c) => p.Name.Equals("suppressParentCache", StringComparison.InvariantCultureIgnoreCase),
-                  (p, c) =>
-                  {
-                      return ApiSettings.Caching.PersonUniqueIdToUsi.SuppressParentCache;
-                  }))
-          .As<IPersonUniqueIdToUsiCache>()
-          .SingleInstance();
+                                return apiSettings.Caching.Redis.Configuration;
+                            }))
+                    .WithParameter(
+                        new ResolvedParameter(
+                            (p, c) => p.Name.Equals("slidingExpirationPeriod", StringComparison.OrdinalIgnoreCase),
+                            (p, c) =>
+                            {
+                                var apiSettings = c.Resolve<ApiSettings>();
+                                int seconds = apiSettings.Caching.PersonUniqueIdToUsi.SlidingExpirationSeconds;
+                                return seconds > 0 ? TimeSpan.FromSeconds(seconds) : null;
+                            }))
+                    .WithParameter(
+                        new ResolvedParameter(
+                            (p, c) => p.Name.Equals("absoluteExpirationPeriod", StringComparison.OrdinalIgnoreCase),
+                            (p, c) =>
+                            {
+                                var apiSettings = c.Resolve<ApiSettings>();
+                                int seconds = apiSettings.Caching.PersonUniqueIdToUsi.AbsoluteExpirationSeconds;
+                                return seconds > 0 ? TimeSpan.FromSeconds(seconds) : null;
+                            }))
+                    .As<IMapCache<(ulong odsInstanceHashId, string personType, PersonMapType mapType), int, string>>()
+                    .SingleInstance();
+            }
         }
     }
 }

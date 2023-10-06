@@ -83,11 +83,6 @@ namespace EdFi.Ods.Repositories.NHibernate.Tests
                 IDescriptorsCache cache = null;
                 DescriptorsCache.GetCache = () => cache ??= _container.Resolve<IDescriptorsCache>();
 
-                IPersonUniqueIdToUsiCache personUniqueIdToUsiCache = null;
-
-                PersonUniqueIdToUsiCache.GetCache = ()
-                    => personUniqueIdToUsiCache ??= _container.Resolve<IPersonUniqueIdToUsiCache>();
-
                 var assembly = typeof(Program).GetTypeInfo().Assembly;
                 XmlConfigurator.Configure(LogManager.GetRepository(assembly));
 
@@ -399,7 +394,6 @@ namespace EdFi.Ods.Repositories.NHibernate.Tests
                 builder.RegisterModule(new DbConnnectionStringBuilderAdapterFactoryModule());
                 builder.RegisterModule(new ContextProviderModule());
                 builder.RegisterModule(new ContextStorageModule());
-                builder.RegisterModule(new UsiModule());
                 builder.RegisterModule(new CachingModule());
                 builder.RegisterModule(new EdFiOdsInstanceIdentificationProviderModule());
                 builder.RegisterModule(new PersonIdentifiersModule());

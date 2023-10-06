@@ -9,25 +9,23 @@ using System.Collections.Generic;
 using System.Linq;
 using EdFi.Common.Extensions;
 using EdFi.Ods.CodeGen.Extensions;
+using EdFi.Ods.CodeGen.Models;
 using EdFi.Ods.Common;
 using EdFi.Ods.Common.Conventions;
 using EdFi.Ods.Common.Extensions;
 using EdFi.Ods.Common.Models.Domain;
 using EdFi.Ods.Common.Models.Resource;
+using EdFi.Ods.Common.Specifications;
 
 namespace EdFi.Ods.CodeGen.Generators.Resources
 {
     public class Resources : GeneratorBase
     {
-        private readonly ResourceCollectionRenderer _resourceCollectionRenderer;
-        private readonly ResourcePropertyRenderer _resourcePropertyRenderer;
+        private readonly ResourceCollectionRenderer _resourceCollectionRenderer = new();
+        private readonly ResourcePropertyRenderer _resourcePropertyRenderer = new();
         private IResourceProfileProvider _resourceProfileProvider;
-
-        public Resources()
-        {
-            _resourcePropertyRenderer = new ResourcePropertyRenderer();
-            _resourceCollectionRenderer = new ResourceCollectionRenderer();
-        }
+        
+        // public static IPersonEntitySpecification PersonEntitySpecification { get; private set; }
 
         protected override void Configure()
         {
@@ -35,13 +33,20 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
                 new ResourceModelProvider(TemplateContext.DomainModelProvider),
                 TemplateContext);
         }
-
+        
         protected override object Build()
         {
             var profileDatas = _resourceProfileProvider
                 .GetResourceProfileData()
                 .ToList();
 
+            var domainModel = TemplateContext.DomainModelProvider.GetDomainModel();
+
+            // PersonEntitySpecification = null; // TODO
+                // new PersonEntitySpecification(
+                //     new PersonTypesProvider(
+                //         new SuppliedDomainModelProvider(domainModel)));
+            
             var schemaNameMapProvider = TemplateContext.DomainModelProvider.GetDomainModel()
                 .SchemaNameMapProvider;
 
@@ -313,7 +318,11 @@ namespace EdFi.Ods.CodeGen.Generators.Resources
                                         PropertyType = p.PropertyType.ToCSharp(),
                                         // Use GetLineage to build the property path, in reverse order, skipping the first since that's the BackReference itself
                                         PropertyPathToRoot = "BackReference." +
-                                            string.Join(".", ((ResourceChildItem)resource).GetLineage().Reverse().Skip(1).Select(l => l.Name))
+                                            string.Join(".", ((ResourceChildItem)resource).GetLineage().Reverse().Skip(1).Select(l => l.Name)),
+                                        IsUniqueId = UniqueIdSpecification.IsUniqueId(p.PropertyName),
+                                        UniqueIdPersonType = UniqueIdSpecification.IsUniqueId(p.PropertyName) 
+                                            ? UniqueIdSpecification.GetUniqueIdPersonType(p.PropertyName)
+                                            : null
                                     }),
                             ReferenceIdentifiers =
                                 _resourcePropertyRenderer.AssembleIdentifiers(

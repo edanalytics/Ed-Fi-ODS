@@ -1,16 +1,22 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 // Licensed to the Ed-Fi Alliance under one or more agreements.
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EdFi.Common;
 using EdFi.Common.Extensions;
+using EdFi.Ods.Api.Caching;
 using EdFi.Ods.Common;
+using EdFi.Ods.Common.Context;
 using EdFi.Ods.Common.Conventions;
 using EdFi.Ods.Common.Extensions;
+using EdFi.Ods.Common.Infrastructure.Activities;
+using EdFi.Ods.Common.Infrastructure.Configuration;
 using EdFi.Ods.Common.Specifications;
 using NHibernate;
 using NHibernate.Criterion;
@@ -24,11 +30,24 @@ namespace EdFi.Ods.Api.IdentityValueMappers
     /// </summary>
     public class PersonIdentifiersProvider : IPersonIdentifiersProvider
     {
+        private readonly IParameterListSetter _parameterListSetter;
         private readonly Func<IStatelessSession> _openStatelessSession;
+        private readonly Lazy<Dictionary<string, string>> _uniqueIdNameByPersonType;
+        private readonly Lazy<Dictionary<string, string>> _usiNameByPersonType;
+        private readonly ConcurrentDictionary<(string personType, PersonMapType? personMapType), string> _hqlByPersonType = new();
 
-        public PersonIdentifiersProvider(Func<IStatelessSession> openStatelessSession)
+        public PersonIdentifiersProvider(
+            Func<IStatelessSession> openStatelessSession,
+            IParameterListSetter parameterListSetter)
         {
+            _parameterListSetter = parameterListSetter;
             _openStatelessSession = Preconditions.ThrowIfNull(openStatelessSession, nameof(openStatelessSession));
+
+            _uniqueIdNameByPersonType = new Lazy<Dictionary<string, string>>(
+                () => PersonEntitySpecification.ValidPersonTypes.ToDictionary(pt => pt, pt => $"{pt}UniqueId"));
+
+            _usiNameByPersonType = new Lazy<Dictionary<string, string>>(
+                () => PersonEntitySpecification.ValidPersonTypes.ToDictionary(pt => pt, pt => $"{pt}USI"));
         }
 
         /// <summary>
@@ -41,35 +60,105 @@ namespace EdFi.Ods.Api.IdentityValueMappers
         /// data back for efficiency reasons, holding on resources such as a database connection until reading is
         /// complete.
         /// </remarks>
-        public async Task<IEnumerable<PersonIdentifiersValueMap>> GetAllPersonIdentifiers(string personType)
+        public async Task<IEnumerable<PersonIdentifiersValueMap>> GetAllPersonIdentifiersAsync(string personType)
         {
-            Preconditions.ThrowIfNull(personType, nameof(personType));
+            return await GetPersonIdentifiers(personType);
+        }
 
-            // Validate Person type
-            if (!PersonEntitySpecification.IsPersonEntity(personType))
+        public async Task<IEnumerable<PersonIdentifiersValueMap>> GetPersonUniqueIdsAsync(string personType, int[] usis)
+        {
+            return await GetPersonIdentifiers(personType, usis: usis);
+        }
+
+        public async Task<IEnumerable<PersonIdentifiersValueMap>> GetPersonUsisAsync(string personType, string[] uniqueIds)
+        {
+            return await GetPersonIdentifiers(personType, uniqueIds: uniqueIds);
+        }
+
+        private async Task<IEnumerable<PersonIdentifiersValueMap>> GetPersonIdentifiers(
+            string personType,
+            string[] uniqueIds = null,
+            int[] usis = null)
+        {
+            ValidateArguments();
+
+            using var session = _openStatelessSession();
+
+            IQuery query = null;
+
+            if (uniqueIds != null)
             {
-                string validPersonTypes = string.Join("','", PersonEntitySpecification.ValidPersonTypes)
-                    .SingleQuoted();
-
-                throw new ArgumentException($"Invalid person type '{personType}'. Valid person types are: {validPersonTypes}");
+                // Load USIs for specified UniqueIds
+                query = session.CreateQuery(GetHql(PersonMapType.UsiByUniqueId));
+                _parameterListSetter.SetParameterList(query, "ids", uniqueIds);
+            }
+            else if (usis != null)
+            {
+                // Load UniqueIds for specified USIs
+                query = session.CreateQuery(GetHql(PersonMapType.UniqueIdByUsi));
+                _parameterListSetter.SetParameterList(query, "ids", usis);
+            }
+            else
+            {
+                // Load all identifiers
+                query = session.CreateQuery(GetHql());
             }
 
-            using (var session = _openStatelessSession())
+            query.SetResultTransformer(Transformers.AliasToBean<PersonIdentifiersValueMap>());
+
+            return await query.ListAsync<PersonIdentifiersValueMap>();
+
+            string GetHql(PersonMapType? mapType = null)
             {
-                string aggregateNamespace = Namespaces.Entities.NHibernate.GetAggregateNamespace(
-                    personType, EdFiConventions.ProperCaseName);
+                return _hqlByPersonType.GetOrAdd(
+                    (personType, mapType),
+                    static (key, args) =>
+                    {
+                        var (pt, mt) = key;
+                        
+                        string aggregateNamespace = Namespaces.Entities.NHibernate.GetAggregateNamespace(
+                            pt,
+                            EdFiConventions.ProperCaseName);
 
-                string entityName = $"{aggregateNamespace}.{personType}";
+                        string entityName = $"{aggregateNamespace}.{pt}";
 
-                var criteria = session.CreateCriteria(entityName)
-                    .SetProjection(
-                        Projections.ProjectionList()
-                            .Add(Projections.Alias(Projections.Property($"{personType}USI"), "Usi"))
-                            .Add(Projections.Alias(Projections.Property($"{personType}UniqueId"), "UniqueId"))
-                    )
-                    .SetResultTransformer(Transformers.AliasToBean<PersonIdentifiersValueMap>());
+                        string whereClause = null;
 
-                return await criteria.ListAsync<PersonIdentifiersValueMap>();
+                        if (mt == PersonMapType.UniqueIdByUsi)
+                        {
+                            whereClause = $" where p.{args._usiNameByPersonType.Value[pt]} in (:ids)";
+                        }
+                        else if (mt == PersonMapType.UsiByUniqueId)
+                        {
+                            whereClause = $" where p.{args._uniqueIdNameByPersonType.Value[pt]} in (:ids)";
+                        }
+
+                        var hql = $"select p.{args._usiNameByPersonType.Value[pt]} as Usi, p.{args._uniqueIdNameByPersonType.Value[pt]} as UniqueId from {entityName} p{whereClause}";
+                        return hql;
+                    },
+                    (_usiNameByPersonType, _uniqueIdNameByPersonType));
+            }
+
+            void ValidateArguments()
+            {
+                ArgumentNullException.ThrowIfNull(personType, nameof(personType));
+
+                bool UsisSupplied() => !(usis == null || usis.Length == 0);
+                bool UniqueIdsSupplied() => !(uniqueIds == null || uniqueIds.Length == 0);
+
+                // Ensure both sets of identifiers are not provided
+                if (UniqueIdsSupplied() && UsisSupplied())
+                {
+                    throw new ArgumentException($"Both '{nameof(uniqueIds)}' and '{nameof(usis)}' cannot be provided.");
+                }
+
+                // Validate Person type
+                if (!PersonEntitySpecification.IsPersonEntity(personType))
+                {
+                    string validPersonTypes = string.Join("', '", PersonEntitySpecification.ValidPersonTypes).SingleQuoted();
+
+                    throw new ArgumentException($"Invalid person type '{personType}'. Valid person types are: {validPersonTypes}");
+                }
             }
         }
     }
