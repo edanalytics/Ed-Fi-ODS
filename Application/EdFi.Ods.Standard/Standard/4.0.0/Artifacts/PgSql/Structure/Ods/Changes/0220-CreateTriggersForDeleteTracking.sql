@@ -4536,10 +4536,10 @@ BEGIN
     SELECT INTO dj0 * FROM edfi.staff j0 WHERE staffusi = old.staffusi;
 
     INSERT INTO tracked_changes_edfi.staffsectionassociation(
-        oldlocalcoursecode, oldschoolid, oldschoolyear, oldsectionidentifier, oldsessionname, oldstaffusi, oldstaffuniqueid,
+        oldbegindate, oldlocalcoursecode, oldschoolid, oldschoolyear, oldsectionidentifier, oldsessionname, oldstaffusi, oldstaffuniqueid,
         id, discriminator, changeversion)
     VALUES (
-        OLD.localcoursecode, OLD.schoolid, OLD.schoolyear, OLD.sectionidentifier, OLD.sessionname, OLD.staffusi, dj0.staffuniqueid, 
+        OLD.begindate, OLD.localcoursecode, OLD.schoolid, OLD.schoolyear, OLD.sectionidentifier, OLD.sessionname, OLD.staffusi, dj0.staffuniqueid, 
         OLD.id, OLD.discriminator, nextval('changes.changeversionsequence'));
 
     RETURN NULL;
