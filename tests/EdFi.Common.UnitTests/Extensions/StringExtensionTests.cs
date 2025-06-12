@@ -86,6 +86,7 @@ namespace EdFi.Ods.Common.UnitTests.Extensions
         [TestCase("nothingdoinghere", "Nothingdoinghere")]
         [TestCase("Ed-Fi", "Ed Fi")]
         [TestCase("Ed-Fi is an MSDF thing", "Ed Fi Is An MSDF Thing")]
+        [TestCase("EdFiXAssessmentRoster", "Ed Fi XAssessment Roster")]
         public void Should_normalize_text_correctly(string text, string expected)
         {
             string actual = text.NormalizeCompositeTermForDisplay(' ', '-');

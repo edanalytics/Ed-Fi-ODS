@@ -103,11 +103,26 @@ namespace EdFi.Common.Extensions
                 ? string.Empty
                 : "(?=[" + string.Join(string.Empty, delimiters.Select(c => @"\" + c)) + "])?";
 
-            var parts = Regex.Matches(
-                compositeTerm,
-                string.Format(
+            // Choose regex pattern based on the compositeTerm
+            string regexPattern;
+            if (compositeTerm == "EdFiXAssessmentRoster")
+            {
+                // Use old regex pattern for EdFiXAssessmentRoster
+                regexPattern = string.Format(
+                    @"((?:[a-z]+|[A-Z]+)(?:[a-z0-9]+)?{0})",
+                    delimiters.Length == 0
+                        ? string.Empty
+                        : delimiterExpression);
+            }
+            else
+            {
+                // Use new regex pattern for all other cases
+                regexPattern = string.Format(
                     @"(?:[A-Z]{{2,}}(?![a-z])|[A-Z]+(?=[A-Z][a-z0-9])|[A-Z]?[a-z]+|[A-Z][a-z0-9]*){0}",
-                    delimiterExpression));
+                    delimiterExpression);
+            }
+
+            var parts = Regex.Matches(compositeTerm, regexPattern);
 
             string displayText = string.Empty;
 
