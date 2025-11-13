@@ -6558,7 +6558,7 @@
         }
       ],
       "isAbstract": false,
-      "description": "The analyzed result of a student's response to an assessment item.. For example:\n    Correct\n    Incorrect\n    Met standard\n    ...",
+      "description": "The analyzed result of a student's response to an assessment item.. For example:    Correct    Incorrect    Met standard    ...",
       "tableNames": {
         "sqlServer": "AssessmentItemResultDescriptor",
         "postgreSql": "AssessmentItemResultDescriptor"
@@ -14524,7 +14524,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "The name of the county, parish, borough, or comparable unit (within a state) in\n                      'which an address is located.",
+          "description": "The name of the county, parish, borough, or comparable unit (within a state) in                      'which an address is located.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "columnNames": {
@@ -25290,7 +25290,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "The name of the county, parish, borough, or comparable unit (within a state) in\n                      'which an address is located.",
+          "description": "The name of the county, parish, borough, or comparable unit (within a state) in                      'which an address is located.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "columnNames": {
@@ -31087,7 +31087,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "The name of the county, parish, borough, or comparable unit (within a state) in\n                      'which an address is located.",
+          "description": "The name of the county, parish, borough, or comparable unit (within a state) in                      'which an address is located.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "columnNames": {
@@ -32123,7 +32123,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "The name of the county, parish, borough, or comparable unit (within a state) in\n                      'which an address is located.",
+          "description": "The name of the county, parish, borough, or comparable unit (within a state) in                      'which an address is located.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "columnNames": {
@@ -39096,7 +39096,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "The name of the county, parish, borough, or comparable unit (within a state) in\n                      'which an address is located.",
+          "description": "The name of the county, parish, borough, or comparable unit (within a state) in                      'which an address is located.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "columnNames": {
@@ -102640,7 +102640,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "Previous definition of ethnicity combining Hispanic/Latino and race:\n        1 - American Indian or Alaskan Native\n        2 - Asian or Pacific Islander\n        3 - Black, not of Hispanic origin\n        4 - Hispanic\n        5 - White, not of Hispanic origin.",
+          "description": "Previous definition of ethnicity combining Hispanic/Latino and race:        1 - American Indian or Alaskan Native        2 - Asian or Pacific Islander        3 - Black, not of Hispanic origin        4 - Hispanic        5 - White, not of Hispanic origin.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "isDeprecated": true,
@@ -120409,7 +120409,7 @@
             "scale": 0,
             "isNullable": true
           },
-          "description": "Previous definition of ethnicity combining Hispanic/Latino and race:\n        1 - American Indian or Alaskan Native\n        2 - Asian or Pacific Islander\n        3 - Black, not of Hispanic origin\n        4 - Hispanic\n        5 - White, not of Hispanic origin.",
+          "description": "Previous definition of ethnicity combining Hispanic/Latino and race:        1 - American Indian or Alaskan Native        2 - Asian or Pacific Islander        3 - Black, not of Hispanic origin        4 - Hispanic        5 - White, not of Hispanic origin.",
           "isIdentifying": false,
           "isServerAssigned": false,
           "isDeprecated": true,
@@ -126348,7 +126348,7 @@
             "scale": 0,
             "isNullable": false
           },
-          "description": "A code describing the attendance event, for example:\n        Present\n        Unexcused absence\n        Excused absence\n        Tardy.",
+          "description": "A code describing the attendance event, for example:        Present        Unexcused absence        Excused absence        Tardy.",
           "isIdentifying": true,
           "isServerAssigned": false,
           "columnNames": {
@@ -131528,7 +131528,7 @@
             "scale": 0,
             "isNullable": false
           },
-          "description": "A code describing the attendance event, for example:\n        Present\n        Unexcused absence\n        Excused absence\n        Tardy.",
+          "description": "A code describing the attendance event, for example:        Present        Unexcused absence        Excused absence        Tardy.",
           "isIdentifying": true,
           "isServerAssigned": false,
           "columnNames": {
@@ -133144,7 +133144,7 @@
             "scale": 0,
             "isNullable": false
           },
-          "description": "A code describing the attendance event, for example:\n        Present\n        Unexcused absence\n        Excused absence\n        Tardy.",
+          "description": "A code describing the attendance event, for example:        Present        Unexcused absence        Excused absence        Tardy.",
           "isIdentifying": true,
           "isServerAssigned": false,
           "columnNames": {
@@ -134423,7 +134423,7 @@
             "scale": 0,
             "isNullable": false
           },
-          "description": "A code describing the attendance event, for example:\n        Present\n        Unexcused absence\n        Excused absence\n        Tardy.",
+          "description": "A code describing the attendance event, for example:        Present        Unexcused absence        Excused absence        Tardy.",
           "isIdentifying": true,
           "isServerAssigned": false,
           "columnNames": {
@@ -134878,7 +134878,7 @@
             "scale": 0,
             "isNullable": false
           },
-          "description": "A code describing the attendance event, for example:\n        Present\n        Unexcused absence\n        Excused absence\n        Tardy.",
+          "description": "A code describing the attendance event, for example:        Present        Unexcused absence        Excused absence        Tardy.",
           "isIdentifying": true,
           "isServerAssigned": false,
           "columnNames": {
@@ -135024,7 +135024,7 @@
             "scale": 0,
             "isNullable": false
           },
-          "description": "A code describing the attendance event, for example:\n        Present\n        Unexcused absence\n        Excused absence\n        Tardy.",
+          "description": "A code describing the attendance event, for example:        Present        Unexcused absence        Excused absence        Tardy.",
           "isIdentifying": true,
           "isServerAssigned": false,
           "columnNames": {
