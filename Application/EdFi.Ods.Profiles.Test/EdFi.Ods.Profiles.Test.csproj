@@ -18,6 +18,7 @@
     <EmbeddedResource Include="Profiles.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Ed-Fi-ODS-Implementation\Application\EdFi.Ods.Extensions.EdFiXassessmentRoster\EdFi.Ods.Extensions.EdFiXassessmentRoster.csproj" />
     <ProjectReference Include="..\..\..\Ed-Fi-ODS-Implementation\Application\EdFi.Ods.Extensions.SEDM\EdFi.Ods.Extensions.SEDM.csproj" />
     <ProjectReference Include="..\..\..\Ed-Fi-ODS\Application\EdFi.Ods.Common\EdFi.Ods.Common.csproj" />
   </ItemGroup>
