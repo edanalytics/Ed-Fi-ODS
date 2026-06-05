@@ -18,6 +18,10 @@
     <EmbeddedResource Include="Profiles.xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="log4net" Version="3.3.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Ed-Fi-ODS-Implementation\Application\EdFi.Ods.Extensions.TPDM\EdFi.Ods.Extensions.TPDM.csproj" />
     <ProjectReference Include="..\..\..\Ed-Fi-ODS\Application\EdFi.Ods.Common\EdFi.Ods.Common.csproj" />
   </ItemGroup>
 </Project>
