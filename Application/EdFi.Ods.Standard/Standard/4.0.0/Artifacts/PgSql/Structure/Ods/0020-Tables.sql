@@ -4733,13 +4733,13 @@ ALTER TABLE edfi.StaffSchoolAssociationGradeLevel ALTER COLUMN CreateDate SET DE
 
 -- Table edfi.StaffSectionAssociation --
 CREATE TABLE edfi.StaffSectionAssociation (
+    BeginDate DATE NOT NULL,
     LocalCourseCode VARCHAR(60) NOT NULL,
     SchoolId INT NOT NULL,
     SchoolYear SMALLINT NOT NULL,
     SectionIdentifier VARCHAR(255) NOT NULL,
     SessionName VARCHAR(60) NOT NULL,
     StaffUSI INT NOT NULL,
-    BeginDate DATE NULL,
     ClassroomPositionDescriptorId INT NOT NULL,
     EndDate DATE NULL,
     HighlyQualifiedTeacher BOOLEAN NULL,
@@ -4749,7 +4749,7 @@ CREATE TABLE edfi.StaffSectionAssociation (
     CreateDate TIMESTAMP NOT NULL,
     LastModifiedDate TIMESTAMP NOT NULL,
     Id UUID NOT NULL,
-    CONSTRAINT StaffSectionAssociation_PK PRIMARY KEY (LocalCourseCode, SchoolId, SchoolYear, SectionIdentifier, SessionName, StaffUSI)
+    CONSTRAINT StaffSectionAssociation_PK PRIMARY KEY (BeginDate, LocalCourseCode, SchoolId, SchoolYear, SectionIdentifier, SessionName, StaffUSI)
 );
 ALTER TABLE edfi.StaffSectionAssociation ALTER COLUMN CreateDate SET DEFAULT current_timestamp;
 ALTER TABLE edfi.StaffSectionAssociation ALTER COLUMN Id SET DEFAULT gen_random_uuid();

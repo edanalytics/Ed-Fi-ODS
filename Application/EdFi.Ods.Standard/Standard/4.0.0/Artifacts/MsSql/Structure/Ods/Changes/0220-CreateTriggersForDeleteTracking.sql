@@ -5158,8 +5158,8 @@ BEGIN
 
     SET NOCOUNT ON
 
-    INSERT INTO [tracked_changes_edfi].[StaffSectionAssociation](OldLocalCourseCode, OldSchoolId, OldSchoolYear, OldSectionIdentifier, OldSessionName, OldStaffUSI, OldStaffUniqueId, Id, Discriminator, ChangeVersion)
-    SELECT d.LocalCourseCode, d.SchoolId, d.SchoolYear, d.SectionIdentifier, d.SessionName, d.StaffUSI, j0.StaffUniqueId, d.Id, d.Discriminator, (NEXT VALUE FOR [changes].[ChangeVersionSequence])
+    INSERT INTO [tracked_changes_edfi].[StaffSectionAssociation](OldBeginDate, OldLocalCourseCode, OldSchoolId, OldSchoolYear, OldSectionIdentifier, OldSessionName, OldStaffUSI, OldStaffUniqueId, Id, Discriminator, ChangeVersion)
+    SELECT d.BeginDate, d.LocalCourseCode, d.SchoolId, d.SchoolYear, d.SectionIdentifier, d.SessionName, d.StaffUSI, j0.StaffUniqueId, d.Id, d.Discriminator, (NEXT VALUE FOR [changes].[ChangeVersionSequence])
     FROM    deleted d
         INNER JOIN edfi.Staff j0
             ON d.StaffUSI = j0.StaffUSI

@@ -7089,13 +7089,13 @@ GO
 
 -- Table [edfi].[StaffSectionAssociation] --
 CREATE TABLE [edfi].[StaffSectionAssociation] (
+    [BeginDate] [DATE] NOT NULL,
     [LocalCourseCode] [NVARCHAR](60) NOT NULL,
     [SchoolId] [INT] NOT NULL,
     [SchoolYear] [SMALLINT] NOT NULL,
     [SectionIdentifier] [NVARCHAR](255) NOT NULL,
     [SessionName] [NVARCHAR](60) NOT NULL,
     [StaffUSI] [INT] NOT NULL,
-    [BeginDate] [DATE] NULL,
     [ClassroomPositionDescriptorId] [INT] NOT NULL,
     [EndDate] [DATE] NULL,
     [HighlyQualifiedTeacher] [BIT] NULL,
@@ -7106,6 +7106,7 @@ CREATE TABLE [edfi].[StaffSectionAssociation] (
     [LastModifiedDate] [DATETIME2] NOT NULL,
     [Id] [UNIQUEIDENTIFIER] NOT NULL,
     CONSTRAINT [StaffSectionAssociation_PK] PRIMARY KEY CLUSTERED (
+        [BeginDate] ASC,
         [LocalCourseCode] ASC,
         [SchoolId] ASC,
         [SchoolYear] ASC,

@@ -27,7 +27,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="log4net" Version="3.3.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.2" />
