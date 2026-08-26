@@ -5,6 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
     <RestorePackages>true</RestorePackages>
     <RootNamespace>EdFi.Ods.Common</RootNamespace>
     <AssemblyName>EdFi.Ods.Common</AssemblyName>
